@@ -3,7 +3,7 @@
     "id": "jeep-compass-longitude-2024",
     "marca": "Jeep",
     "modelo": "Compass",
-    "versao": "LONGITUDE 1.3 T270",
+    "versao": "LONGITUDE",
     "anoFabricacao": 2024,
     "anoModelo": 2024,
     "km": 50617,
@@ -25,81 +25,224 @@
       "Controle de estabilidade",
       "Piloto automático"
     ],
-    "descricao": "Jeep Compass Longitude 1.3 T270 2024/2024, 50.617 km rodados, câmbio automático, motor flex, na cor cinza. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "Jeep Compass Longitude 2024/2024, 50.617 km rodados, câmbio automático, motor flex, na cor cinza. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive.",
     "fotos": [
-      "assets/img/veiculos/suv-1.svg",
-      "assets/img/veiculos/suv-2.svg",
-      "assets/img/veiculos/suv-3.svg"
+      "assets/img/veiculos/compass-1.jpg"
     ],
     "destaque": true,
-    "dataCadastro": "2026-10-01"
+    "dataCadastro": "2026-10-10"
   },
   {
-    "id": "volkswagen-polo-highline-2023",
-    "marca": "Volkswagen",
-    "modelo": "Polo",
-    "versao": "HIGHLINE 1.0 200 TSI",
-    "anoFabricacao": 2023,
-    "anoModelo": 2023,
-    "km": 28450,
-    "cambio": "Automático",
-    "combustivel": "Flex",
-    "carroceria": "Hatch",
-    "cor": "Branco",
-    "portas": 4,
-    "preco": 98900,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Vidros elétricos",
-      "Travas elétricas",
-      "Multimídia",
-      "Chave presencial",
-      "Faróis de LED",
-      "Airbags",
-      "Freios ABS"
-    ],
-    "descricao": "Volkswagen Polo Highline 1.0 200 Tsi 2023/2023, 28.450 km rodados, câmbio automático, motor flex, na cor branco. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/hatch-1.svg",
-      "assets/img/veiculos/hatch-2.svg",
-      "assets/img/veiculos/hatch-3.svg"
-    ],
-    "destaque": true,
-    "dataCadastro": "2026-10-03"
-  },
-  {
-    "id": "toyota-corolla-xei-2023",
+    "id": "toyota-corolla-cross-xre-2023",
     "marca": "Toyota",
-    "modelo": "Corolla",
-    "versao": "XEI 2.0 DYNAMIC FORCE",
+    "modelo": "Corolla Cross",
+    "versao": "XRE",
     "anoFabricacao": 2022,
     "anoModelo": 2023,
-    "km": 41200,
+    "km": 32100,
     "cambio": "CVT",
     "combustivel": "Flex",
-    "carroceria": "Sedã",
-    "cor": "Prata",
+    "carroceria": "SUV",
+    "cor": "Cinza",
     "portas": 4,
-    "preco": 129900,
+    "preco": 149900,
     "opcionais": [
       "Ar-condicionado",
       "Direção elétrica",
       "Multimídia",
       "Câmera de ré",
       "Bancos de couro",
+      "Faróis de LED",
       "Piloto automático",
-      "Revisões na concessionária",
-      "Único dono"
+      "Sensor de estacionamento"
     ],
-    "descricao": "Toyota Corolla Xei 2.0 Dynamic Force 2022/2023, 41.200 km rodados, câmbio cvt, motor flex, na cor prata. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "Toyota Corolla Cross XRE 2022/2023, 32.100 km rodados, câmbio CVT, motor flex, na cor cinza. Impecável estado de conservação, revisões em dia e garantia de procedência.",
     "fotos": [
-      "assets/img/veiculos/seda-1.svg",
-      "assets/img/veiculos/seda-2.svg",
-      "assets/img/veiculos/seda-3.svg"
+      "assets/img/veiculos/corolla-cross-1.jpg"
     ],
     "destaque": true,
-    "dataCadastro": "2026-09-28"
+    "dataCadastro": "2026-10-09"
+  },
+  {
+    "id": "volkswagen-polo-highline-2022",
+    "marca": "Volkswagen",
+    "modelo": "Polo",
+    "versao": "HIGHLINE 200 TSI",
+    "anoFabricacao": 2021,
+    "anoModelo": 2022,
+    "km": 41200,
+    "cambio": "Automático",
+    "combustivel": "Flex",
+    "carroceria": "Hatch",
+    "cor": "Vermelho",
+    "portas": 4,
+    "preco": 89900,
+    "opcionais": [
+      "Ar-condicionado digital",
+      "Direção elétrica",
+      "Painel digital Active Info Display",
+      "Multimídia VW Play",
+      "Chave presencial",
+      "Faróis de LED",
+      "Rodas de liga leve"
+    ],
+    "descricao": "Volkswagen Polo Highline 200 TSI 2021/2022, 41.200 km rodados, motor turbo econômico e potente, revisões na concessionária e laudo cautelar 100% aprovado.",
+    "fotos": [
+      "assets/img/veiculos/polo-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-08"
+  },
+  {
+    "id": "toyota-hilux-srx-2021",
+    "marca": "Toyota",
+    "modelo": "Hilux",
+    "versao": "SRX 4X4 DIESEL",
+    "anoFabricacao": 2020,
+    "anoModelo": 2021,
+    "km": 65000,
+    "cambio": "Automático",
+    "combustivel": "Diesel",
+    "carroceria": "Picape",
+    "cor": "Preto",
+    "portas": 4,
+    "preco": 289900,
+    "opcionais": [
+      "Ar-condicionado digital dual zone",
+      "Direção hidráulica",
+      "Tração 4x4 com reduzida",
+      "Bancos de couro com ventilação",
+      "Sistema de som JBL",
+      "Câmera 360",
+      "Faróis em LED"
+    ],
+    "descricao": "Toyota Hilux SRX 4X4 Turbodiesel 2020/2021, 65.000 km rodados, versão topo de linha na elegante cor preto metálico. Robusta, potente e completa.",
+    "fotos": [
+      "assets/img/veiculos/hilux-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-07"
+  },
+  {
+    "id": "hyundai-hb20-comfort-plus-2021",
+    "marca": "Hyundai",
+    "modelo": "HB20",
+    "versao": "COMFORT PLUS",
+    "anoFabricacao": 2020,
+    "anoModelo": 2021,
+    "km": 58000,
+    "cambio": "Manual",
+    "combustivel": "Flex",
+    "carroceria": "Hatch",
+    "cor": "Vermelho",
+    "portas": 4,
+    "preco": 69900,
+    "opcionais": [
+      "Ar-condicionado",
+      "Direção elétrica",
+      "Vidros elétricos nas 4 portas",
+      "Multimídia blueMedia",
+      "Comandos no volante",
+      "Airbags frontais",
+      "Freios ABS"
+    ],
+    "descricao": "Hyundai HB20 Comfort Plus 2020/2021, 58.000 km rodados, super econômico, perfeito para o dia a dia. Único dono, documentação totalmente em dia.",
+    "fotos": [
+      "assets/img/veiculos/hb20-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-06"
+  },
+  {
+    "id": "chevrolet-s10-ltz-2022",
+    "marca": "Chevrolet",
+    "modelo": "S10",
+    "versao": "LTZ 4X4",
+    "anoFabricacao": 2021,
+    "anoModelo": 2022,
+    "km": 52000,
+    "cambio": "Automático",
+    "combustivel": "Diesel",
+    "carroceria": "Picape",
+    "cor": "Preto",
+    "portas": 4,
+    "preco": 219900,
+    "opcionais": [
+      "Ar-condicionado digital",
+      "Direção elétrica",
+      "Tração 4x4",
+      "MyLink com Wi-Fi e OnStar",
+      "Bancos em couro",
+      "Alerta de colisão frontal",
+      "Câmera de ré"
+    ],
+    "descricao": "Chevrolet S10 LTZ 2.8 Turbodiesel 4x4 2021/2022, 52.000 km, câmbio automático de 6 marchas, acabamento premium e excelente capacidade de carga.",
+    "fotos": [
+      "assets/img/veiculos/s10-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-05"
+  },
+  {
+    "id": "honda-civic-touring-2020",
+    "marca": "Honda",
+    "modelo": "Civic",
+    "versao": "TOURING 1.5 TURBO",
+    "anoFabricacao": 2019,
+    "anoModelo": 2020,
+    "km": 48000,
+    "cambio": "CVT",
+    "combustivel": "Gasolina",
+    "carroceria": "Sedã",
+    "cor": "Prata",
+    "portas": 4,
+    "preco": 139900,
+    "opcionais": [
+      "Ar-condicionado dual zone",
+      "Teto solar elétrico",
+      "Câmera de ponto cego LaneWatch",
+      "Faróis Full LED",
+      "Bancos em couro",
+      "Sistema de som premium 452W",
+      "Carregador por indução"
+    ],
+    "descricao": "Honda Civic Touring 1.5 Turbo 2019/2020, 48.000 km, modelo topo de linha, esportividade aliada ao conforto. Revisões na concessionária e estado de novo.",
+    "fotos": [
+      "assets/img/veiculos/civic-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-04"
+  },
+  {
+    "id": "toyota-corolla-gli-2021",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "versao": "GLi 2.0",
+    "anoFabricacao": 2021,
+    "anoModelo": 2021,
+    "km": 39500,
+    "cambio": "CVT",
+    "combustivel": "Flex",
+    "carroceria": "Sedã",
+    "cor": "Prata",
+    "portas": 4,
+    "preco": 124900,
+    "status": "reservado",
+    "opcionais": [
+      "Ar-condicionado",
+      "Direção elétrica",
+      "Multimídia Toyota Play",
+      "Câmera de ré",
+      "7 Airbags",
+      "Controle de tração e estabilidade",
+      "Piloto automático adaptativo"
+    ],
+    "descricao": "Toyota Corolla GLi 2.0 Dynamic Force 2021/2021, 39.500 km, câmbio CVT Direct Shift com 10 velocidades simuladas. Veículo reservado para cliente.",
+    "fotos": [
+      "assets/img/veiculos/corolla-1.jpg"
+    ],
+    "destaque": true,
+    "dataCadastro": "2026-10-03"
   },
   {
     "id": "fiat-toro-volcano-2023",
@@ -118,54 +261,17 @@
     "opcionais": [
       "Ar-condicionado",
       "Direção elétrica",
-      "Multimídia",
+      "Multimídia vertical",
       "Tração 4x4",
       "Bancos de couro",
-      "Câmera de ré",
-      "Rodas de liga",
-      "IPVA pago"
+      "Câmera de ré"
     ],
-    "descricao": "Fiat Toro Volcano 2.0 Turbodiesel 4X4 2023/2023, 35.800 km rodados, câmbio automático, motor diesel, na cor preto. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "Fiat Toro Volcano 2.0 Turbodiesel 4X4 2023/2023, 35.800 km rodados, câmbio automático de 9 marchas.",
     "fotos": [
-      "assets/img/veiculos/picape-1.svg",
-      "assets/img/veiculos/picape-2.svg",
-      "assets/img/veiculos/picape-3.svg"
+      "assets/img/veiculos/s10-1.jpg"
     ],
-    "destaque": true,
-    "dataCadastro": "2026-10-05"
-  },
-  {
-    "id": "chevrolet-onix-lt-2026",
-    "marca": "Chevrolet",
-    "modelo": "Onix",
-    "versao": "LT 1.0 TURBO",
-    "anoFabricacao": 2026,
-    "anoModelo": 2026,
-    "km": 0,
-    "cambio": "Automático",
-    "combustivel": "Flex",
-    "carroceria": "Hatch",
-    "cor": "Vermelho",
-    "portas": 4,
-    "preco": 104990,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Vidros elétricos",
-      "Travas elétricas",
-      "Multimídia",
-      "Airbags",
-      "Freios ABS",
-      "Controle de estabilidade"
-    ],
-    "descricao": "Chevrolet Onix Lt 1.0 Turbo 2026/2026, zero quilômetro, câmbio automático, motor flex, na cor vermelho. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/hatch-1.svg",
-      "assets/img/veiculos/hatch-2.svg",
-      "assets/img/veiculos/hatch-3.svg"
-    ],
-    "destaque": true,
-    "dataCadastro": "2026-10-08"
+    "destaque": false,
+    "dataCadastro": "2026-09-25"
   },
   {
     "id": "hyundai-creta-platinum-2025",
@@ -178,28 +284,21 @@
     "cambio": "Automático",
     "combustivel": "Flex",
     "carroceria": "SUV",
-    "cor": "Azul",
+    "cor": "Cinza",
     "portas": 4,
     "preco": 154900,
     "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Multimídia",
-      "Teto solar",
-      "Bancos de couro",
-      "Chave presencial",
-      "Faróis de LED",
-      "Câmera de ré",
-      "Sensor de estacionamento"
+      "Ar-condicionado digital",
+      "Teto solar panorâmico",
+      "Bancos de couro ventilados",
+      "Câmera 360 graus"
     ],
-    "descricao": "Hyundai Creta Platinum 1.0 Tgdi 2024/2025, 12.300 km rodados, câmbio automático, motor flex, na cor azul. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "Hyundai Creta Platinum 1.0 TGDI 2024/2025, apenas 12.300 km rodados, na garantia de fábrica.",
     "fotos": [
-      "assets/img/veiculos/suv-1.svg",
-      "assets/img/veiculos/suv-2.svg",
-      "assets/img/veiculos/suv-3.svg"
+      "assets/img/veiculos/corolla-cross-1.jpg"
     ],
-    "destaque": true,
-    "dataCadastro": "2026-10-06"
+    "destaque": false,
+    "dataCadastro": "2026-09-20"
   },
   {
     "id": "renault-master-furgao-2022",
@@ -219,145 +318,14 @@
       "Ar-condicionado",
       "Direção hidráulica",
       "Vidros elétricos",
-      "Travas elétricas",
-      "Airbags",
-      "Freios ABS"
+      "Travas elétricas"
     ],
-    "descricao": "Renault Master Furgão L3H2 2.3 Dci 2022/2022, 88.000 km rodados, câmbio manual, motor diesel, na cor branco. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "Renault Master Furgão L3H2 2022/2022, 88.000 km, ideal para transporte e logística.",
     "fotos": [
-      "assets/img/veiculos/utilitario-1.svg",
-      "assets/img/veiculos/utilitario-2.svg",
-      "assets/img/veiculos/utilitario-3.svg"
-    ],
-    "destaque": false,
-    "dataCadastro": "2026-09-20"
-  },
-  {
-    "id": "volkswagen-delivery-11-180-2021",
-    "marca": "Volkswagen",
-    "modelo": "Delivery",
-    "versao": "11.180 CHASSI",
-    "anoFabricacao": 2021,
-    "anoModelo": 2021,
-    "km": 120500,
-    "cambio": "Manual",
-    "combustivel": "Diesel",
-    "carroceria": "Caminhão",
-    "cor": "Branco",
-    "portas": 2,
-    "preco": 289000,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção hidráulica",
-      "Vidros elétricos",
-      "Freios ABS",
-      "Revisões na concessionária"
-    ],
-    "descricao": "Volkswagen Delivery 11.180 Chassi 2021/2021, 120.500 km rodados, câmbio manual, motor diesel, na cor branco. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/caminhao-1.svg",
-      "assets/img/veiculos/caminhao-2.svg",
-      "assets/img/veiculos/caminhao-3.svg"
+      "assets/img/veiculos/utilitario-1.svg"
     ],
     "destaque": false,
     "dataCadastro": "2026-09-15"
-  },
-  {
-    "id": "honda-civic-touring-2021",
-    "marca": "Honda",
-    "modelo": "Civic",
-    "versao": "TOURING 1.5 TURBO",
-    "anoFabricacao": 2021,
-    "anoModelo": 2021,
-    "km": 52300,
-    "cambio": "CVT",
-    "combustivel": "Gasolina",
-    "carroceria": "Sedã",
-    "cor": "Preto",
-    "portas": 4,
-    "preco": 139900,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Multimídia",
-      "Teto solar",
-      "Bancos de couro",
-      "Piloto automático",
-      "Chave presencial",
-      "Faróis de LED"
-    ],
-    "descricao": "Honda Civic Touring 1.5 Turbo 2021/2021, 52.300 km rodados, câmbio cvt, motor gasolina, na cor preto. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/seda-1.svg",
-      "assets/img/veiculos/seda-2.svg",
-      "assets/img/veiculos/seda-3.svg"
-    ],
-    "destaque": true,
-    "dataCadastro": "2026-09-30",
-    "status": "reservado"
-  },
-  {
-    "id": "fiat-mobi-like-2021",
-    "marca": "Fiat",
-    "modelo": "Mobi",
-    "versao": "LIKE 1.0",
-    "anoFabricacao": 2020,
-    "anoModelo": 2021,
-    "km": 61200,
-    "cambio": "Manual",
-    "combustivel": "Flex",
-    "carroceria": "Hatch",
-    "cor": "Branco",
-    "portas": 4,
-    "preco": 49900,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Vidros elétricos",
-      "Travas elétricas",
-      "IPVA pago"
-    ],
-    "descricao": "Fiat Mobi Like 1.0 2020/2021, 61.200 km rodados, câmbio manual, motor flex, na cor branco. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/hatch-1.svg",
-      "assets/img/veiculos/hatch-2.svg",
-      "assets/img/veiculos/hatch-3.svg"
-    ],
-    "destaque": false,
-    "dataCadastro": "2026-08-10"
-  },
-  {
-    "id": "toyota-hilux-srv-2022",
-    "marca": "Toyota",
-    "modelo": "Hilux",
-    "versao": "SRV 2.8 TURBODIESEL 4X4",
-    "anoFabricacao": 2022,
-    "anoModelo": 2022,
-    "km": 78000,
-    "cambio": "Automático",
-    "combustivel": "Diesel",
-    "carroceria": "Picape",
-    "cor": "Prata",
-    "portas": 4,
-    "preco": 249900,
-    "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Multimídia",
-      "Tração 4x4",
-      "Bancos de couro",
-      "Câmera de ré",
-      "Piloto automático",
-      "Único dono"
-    ],
-    "descricao": "Toyota Hilux Srv 2.8 Turbodiesel 4X4 2022/2022, 78.000 km rodados, câmbio automático, motor diesel, na cor prata. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
-    "fotos": [
-      "assets/img/veiculos/picape-1.svg",
-      "assets/img/veiculos/picape-2.svg",
-      "assets/img/veiculos/picape-3.svg"
-    ],
-    "destaque": false,
-    "dataCadastro": "2026-09-10"
   },
   {
     "id": "byd-dolphin-gs-2025",
@@ -370,26 +338,20 @@
     "cambio": "Automático",
     "combustivel": "Elétrico",
     "carroceria": "Hatch",
-    "cor": "Azul",
+    "cor": "Vermelho",
     "portas": 4,
     "preco": 129990,
     "opcionais": [
-      "Ar-condicionado",
-      "Direção elétrica",
-      "Multimídia",
-      "Câmera de ré",
-      "Chave presencial",
-      "Faróis de LED",
-      "Teto solar",
-      "Controle de estabilidade"
+      "Ar-condicionado automático",
+      "Tela giratória rotativa",
+      "Câmera 360",
+      "Controle de cruzeiro adaptativo"
     ],
-    "descricao": "BYD Dolphin Gs 180 Cv 2025/2025, 8.400 km rodados, câmbio automático, motor elétrico, na cor azul. Veículo revisado e com procedência verificada pela nossa equipe. Venha conhecer pessoalmente e agende seu test drive. Aceitamos seu usado na troca e facilitamos o financiamento.",
+    "descricao": "BYD Dolphin GS 2025/2025, 8.400 km rodados, 100% elétrico, autonomia excelente.",
     "fotos": [
-      "assets/img/veiculos/hatch-1.svg",
-      "assets/img/veiculos/hatch-2.svg",
-      "assets/img/veiculos/hatch-3.svg"
+      "assets/img/veiculos/polo-1.jpg"
     ],
     "destaque": false,
-    "dataCadastro": "2026-10-02"
+    "dataCadastro": "2026-09-10"
   }
 ]

@@ -31,8 +31,8 @@ window.SITE_CONFIG = {
     rodapeTexto: 'Veículos seminovos selecionados, atendimento transparente e as melhores oportunidades para você comprar, vender ou trocar seu veículo.',
     logo: 'assets/img/logo.png',            // logo para fundo claro (header)
     logoClaro: 'assets/img/logo-claro.png', // logo para fundo escuro (painel/login)
-    heroImg: 'assets/img/hero.svg',
-    heroIlustrativa: true,                  // mostra o selo "Imagem ilustrativa" na hero
+    heroImg: 'assets/img/hero.jpg',
+    heroIlustrativa: false,                  // mostra o selo "Imagem ilustrativa" na hero
     lojaImg: 'assets/img/loja.svg',
     paginaLojaImg: 'assets/img/loja.svg'
   },
