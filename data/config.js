@@ -33,8 +33,8 @@ window.SITE_CONFIG = {
     logoClaro: 'assets/img/logo-claro.png', // logo para fundo escuro (painel/login)
     heroImg: 'assets/img/hero.jpg',
     heroIlustrativa: false,                  // mostra o selo "Imagem ilustrativa" na hero
-    lojaImg: 'assets/img/loja.svg',
-    paginaLojaImg: 'assets/img/loja.svg'
+    lojaImg: 'assets/img/loja.jpg',
+    paginaLojaImg: 'assets/img/loja.jpg'
   },
 
   // IDENTIDADE VISUAL — cores do site (formato #RRGGBB). Com o Supabase ativo,
