@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs><radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#3a4a72"/><stop offset="1" stop-color="#0f1a33"/></radialGradient>
+<linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f5f7"/><stop offset=".55" stop-color="#c8ccd6"/><stop offset="1" stop-color="#6d7482"/></linearGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<rect y="430" width="800" height="170" fill="url(#floor)"/>
+<path d="M0 430 H800" stroke="#D4A537" stroke-opacity=".35" stroke-width="2"/>
+<g><g transform="translate(0 20) scale(1)" opacity="1">
+<ellipse cx="420" cy="455" rx="340" ry="22" fill="#000" opacity=".35"/>
+<path d="M150 400 L160 340 Q170 318 200 312 L290 300 L360 236 Q378 222 405 220 L540 220 Q568 222 585 240 L640 300 Q665 306 668 330 L672 400 Z" fill="url(#body)" stroke="#ffffff" stroke-opacity=".25" stroke-width="2"/>
+<path d="M375 245 Q385 236 402 235 L470 235 L470 296 L310 300 Z M484 235 L540 235 Q560 236 572 250 L615 296 L484 296 Z" fill="#0f1830" opacity=".85"/>
+<path d="M150 360 L700 360" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>
+<circle cx="255" cy="405" r="46" fill="#0d0f14"/><circle cx="255" cy="405" r="26" fill="#9aa2b1"/><circle cx="255" cy="405" r="9" fill="#5b6270"/><circle cx="580" cy="405" r="46" fill="#0d0f14"/><circle cx="580" cy="405" r="26" fill="#9aa2b1"/><circle cx="580" cy="405" r="9" fill="#5b6270"/></g></g>
+<text x="24" y="572" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#fff" fill-opacity=".55">Foto 3 · Imagem ilustrativa</text>
+</svg>

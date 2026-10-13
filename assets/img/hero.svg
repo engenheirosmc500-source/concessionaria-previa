@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" width="1600" height="700" preserveAspectRatio="xMidYMid slice">
+<defs><radialGradient id="bg" cx="72%" cy="45%" r="70%"><stop offset="0" stop-color="#2c3d6b"/><stop offset=".55" stop-color="#121b3a"/><stop offset="1" stop-color="#070b1c"/></radialGradient>
+<linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c9ced8"/><stop offset="1" stop-color="#5b6272"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D4A537" stop-opacity="0"/><stop offset=".5" stop-color="#F3D27A"/><stop offset="1" stop-color="#D4A537" stop-opacity="0"/></linearGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient></defs>
+<rect width="1600" height="700" fill="url(#bg)"/>
+<g opacity=".5"><rect x="700" y="80" width="900" height="3" fill="url(#gold)"/><rect x="820" y="110" width="700" height="2" fill="url(#gold)"/><rect x="760" y="140" width="820" height="1.5" fill="url(#gold)"/></g>
+<rect y="520" width="1600" height="180" fill="url(#floor)"/>
+<path d="M600 522 H1600" stroke="#D4A537" stroke-opacity=".5" stroke-width="2"/>
+<g transform="translate(640 60) scale(1.15)" opacity="1">
+<ellipse cx="420" cy="455" rx="340" ry="22" fill="#000" opacity=".35"/>
+<path d="M110 400 L118 345 Q126 322 160 316 L280 302 L350 240 Q368 226 395 224 L520 224 Q548 226 568 244 L625 300 L700 312 Q725 318 728 345 L730 400 Z" fill="url(#body)" stroke="#ffffff" stroke-opacity=".25" stroke-width="2"/>
+<path d="M365 250 Q375 240 395 239 L455 239 L455 298 L300 302 Z M469 239 L520 239 Q542 240 556 254 L600 298 L469 298 Z" fill="#0f1830" opacity=".85"/>
+<path d="M150 360 L700 360" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>
+<circle cx="225" cy="405" r="46" fill="#0d0f14"/><circle cx="225" cy="405" r="26" fill="#9aa2b1"/><circle cx="225" cy="405" r="9" fill="#5b6270"/><circle cx="620" cy="405" r="46" fill="#0d0f14"/><circle cx="620" cy="405" r="26" fill="#9aa2b1"/><circle cx="620" cy="405" r="9" fill="#5b6270"/></g>
+</svg>

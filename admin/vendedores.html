@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendedores | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <section class="card">
+    <div class="card-head"><div><h2>Vendedores exibidos no site</h2><p>Aparecem no menu “Vendedores” e no rodapé. Arraste para mudar a ordem.</p></div></div>
+    <ul class="sort-list" id="lista"><li class="muted">Carregando…</li></ul>
+  </section>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, icon = A.icon;
+  var sb, vend = [], usuarios = [];
+
+  Admin.init({ page: 'vendedores', adminOnly: true, title: 'Vendedores', crumbs: [{ label: 'Vendedores' }], action: { label: 'Novo vendedor', href: '#', id: 'novo' } }).then(function (ctx) {
+    sb = ctx.sb;
+    A.qs('#novo').addEventListener('click', function (e) { e.preventDefault(); editar(null); });
+    Admin.usuarios().then(function (u) { usuarios = u; });
+    carregar();
+  });
+
+  function carregar() {
+    return sb.from('vendedores').select('*').order('ordem').then(function (r) {
+      if (r.error) return Admin.erro(r.error);
+      vend = r.data; render();
+    });
+  }
+  function render() {
+    var ul = A.qs('#lista');
+    if (!vend.length) { ul.innerHTML = '<li class="empty-row" style="display:block">' + icon('users') + 'Nenhum vendedor cadastrado. Clique em “Novo vendedor”.</li>'; return; }
+    ul.innerHTML = vend.map(function (v, i) {
+      return '<li draggable="true" data-i="' + i + '">' +
+        '<span class="grip" aria-hidden="true">' + icon('grip') + '</span>' +
+        Admin.avatar({ nome: v.nome, avatar: v.foto }) +
+        '<div class="info"><strong>' + esc(v.nome) + '</strong><small>' + esc(v.cargo || 'Vendedor') + ' · ' + esc(A.maskPhone(String(v.whatsapp).replace(/^55/, ''))) + '</small></div>' +
+        '<label class="switch" title="Exibir no site"><input type="checkbox" data-ativo="' + v.id + '"' + (v.ativo ? ' checked' : '') + '><span class="tr"></span><span class="hide-sm">No site</span></label>' +
+        '<a class="icon-sq wa" href="' + esc(A.waLink(v.whatsapp, 'Teste do site: este é o link do WhatsApp de ' + v.nome + '.')) + '" target="_blank" rel="noopener" title="Testar WhatsApp" aria-label="Testar WhatsApp">' + icon('whatsapp') + '</a>' +
+        '<button type="button" class="icon-sq" data-edit="' + i + '" aria-label="Editar">' + icon('file') + '</button>' +
+        '<button type="button" class="icon-sq" data-del="' + i + '" aria-label="Remover">' + icon('trash') + '</button>' +
+        '<span style="display:flex;flex-direction:column;line-height:1"><button type="button" class="btn-ghost" data-mv="' + i + '" data-d="-1" aria-label="Subir"' + (i === 0 ? ' disabled' : '') + '>▲</button><button type="button" class="btn-ghost" data-mv="' + i + '" data-d="1" aria-label="Descer"' + (i === vend.length - 1 ? ' disabled' : '') + '>▼</button></span>' +
+        '</li>';
+    }).join('');
+  }
+
+  function salvarOrdem() {
+    var ups = vend.map(function (v, i) { v.ordem = i; return sb.from('vendedores').update({ ordem: i }).eq('id', v.id); });
+    Promise.all(ups).then(function (rs) { var e = rs.filter(function (r) { return r.error; })[0]; if (e) Admin.erro(e.error); else A.toast('Ordem atualizada.'); });
+  }
+  function mover(de, para) { if (para < 0 || para >= vend.length) return; var v = vend.splice(de, 1)[0]; vend.splice(para, 0, v); render(); salvarOrdem(); }
+
+  function editar(v) {
+    var foto = v ? v.foto : null;
+    Admin.modal({
+      title: v ? 'Editar vendedor' : 'Novo vendedor',
+      body: '<div class="field"><label for="v-nome">Nome *</label><input class="input" id="v-nome" required value="' + esc(v ? v.nome : '') + '"></div>' +
+        '<div class="field"><label for="v-cargo">Cargo</label><input class="input" id="v-cargo" value="' + esc(v ? v.cargo : 'Vendedor') + '"></div>' +
+        '<div class="field"><label for="v-wa">WhatsApp *</label><input class="input" id="v-wa" data-mask="phone" inputmode="tel" placeholder="(31) 99999-9999" value="' + esc(v ? String(v.whatsapp).replace(/^55/, '') : '') + '"></div>' +
+        '<div class="field"><label for="v-foto">Foto (opcional)</label><input class="input" type="file" id="v-foto" accept="image/jpeg,image/png,image/webp"></div>' +
+        '<div class="field"><label for="v-prof">Vincular a um usuário do painel</label><select class="select" id="v-prof"><option value="">Não vincular</option>' +
+        usuarios.map(function (u) { return '<option value="' + u.id + '"' + (v && v.profile_id === u.id ? ' selected' : '') + '>' + esc(u.nome || u.email) + '</option>'; }).join('') + '</select>' +
+        '<span class="hint">Assim os leads e as vendas ficam no nome desta pessoa.</span></div>' +
+        '<label class="check"><input type="checkbox" id="v-ativo"' + (!v || v.ativo ? ' checked' : '') + '> Exibir no site</label>',
+      confirmText: 'Salvar',
+      onConfirm: function (m) {
+        var nome = A.qs('#v-nome', m).value.trim(), wa = A.onlyDigits(A.qs('#v-wa', m).value);
+        if (!nome) { A.toast('Informe o nome.'); return false; }
+        if (wa.length < 10 || wa.length > 11) { A.toast('Informe um WhatsApp válido com DDD.'); return false; }
+        var arq = A.qs('#v-foto', m).files[0];
+        var up = arq ? Admin.uploadImagemSite(arq, 'vendedores', 600).then(function (r) { return r.url; }) : Promise.resolve(foto);
+        return up.then(function (url) {
+          var row = { nome: nome, cargo: A.qs('#v-cargo', m).value.trim() || 'Vendedor', whatsapp: '55' + wa, foto: url || null, ativo: A.qs('#v-ativo', m).checked, profile_id: A.qs('#v-prof', m).value || null };
+          if (!v) row.ordem = vend.length;
+          return v ? sb.from('vendedores').update(row).eq('id', v.id) : sb.from('vendedores').insert(row);
+        }).then(function (r) { if (r.error) throw r.error; A.toast('Vendedor salvo.'); carregar(); });
+      }
+    });
+  }
+
+  var ul = A.qs('#lista'), dragI = null;
+  ul.addEventListener('change', function (e) {
+    var t = e.target.closest('[data-ativo]'); if (!t) return;
+    sb.from('vendedores').update({ ativo: t.checked }).eq('id', t.getAttribute('data-ativo')).then(function (r) {
+      if (r.error) return Admin.erro(r.error);
+      A.toast(t.checked ? 'Vendedor visível no site.' : 'Vendedor oculto do site.');
+    });
+  });
+  ul.addEventListener('click', function (e) {
+    var ed = e.target.closest('[data-edit]'); if (ed) return editar(vend[Number(ed.getAttribute('data-edit'))]);
+    var mv = e.target.closest('[data-mv]'); if (mv) { var i = Number(mv.getAttribute('data-mv')); return mover(i, i + Number(mv.getAttribute('data-d'))); }
+    var dl = e.target.closest('[data-del]');
+    if (dl) {
+      var v = vend[Number(dl.getAttribute('data-del'))];
+      Admin.confirmar('Tem certeza que deseja remover ' + v.nome + '? Essa ação não pode ser desfeita.', { title: 'Remover vendedor', danger: true, confirmText: 'Remover' }).then(function (ok) {
+        if (!ok) return;
+        sb.from('vendedores').delete().eq('id', v.id).then(function (r) { if (r.error) return Admin.erro(r.error); A.toast('Vendedor removido.'); carregar(); });
+      });
+    }
+  });
+  ul.addEventListener('dragstart', function (e) { var li = e.target.closest('li[data-i]'); if (!li) return; dragI = Number(li.getAttribute('data-i')); li.classList.add('dragging'); try { e.dataTransfer.setData('text/plain', dragI); } catch (x) {} });
+  ul.addEventListener('dragover', function (e) { var li = e.target.closest('li[data-i]'); if (dragI === null || !li) return; e.preventDefault(); A.qsa('li.over', ul).forEach(function (x) { x.classList.remove('over'); }); li.classList.add('over'); });
+  ul.addEventListener('drop', function (e) { var li = e.target.closest('li[data-i]'); if (dragI === null || !li) return; e.preventDefault(); mover(dragI, Number(li.getAttribute('data-i'))); dragI = null; });
+  ul.addEventListener('dragend', function () { dragI = null; A.qsa('li', ul).forEach(function (x) { x.classList.remove('dragging', 'over'); }); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadastro de veículo | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <form id="vform" novalidate>
+    <div class="form-sections">
+      <div>
+        <section class="card">
+          <h2 data-i="car">Identificação</h2>
+          <div class="grid-fields">
+            <div class="field"><label for="marca">Marca *</label><input class="input" id="marca" name="marca" list="lista-marcas" required autocomplete="off" placeholder="Digite ou escolha"><datalist id="lista-marcas"></datalist></div>
+            <div class="field"><label for="modelo">Modelo *</label><input class="input" id="modelo" name="modelo" required placeholder="Ex.: Compass"></div>
+            <div class="field"><label for="versao">Versão</label><input class="input" id="versao" name="versao" placeholder="Ex.: Longitude 1.3 T270"></div>
+            <div class="field"><label for="ano_fabricacao">Ano fabricação *</label><input class="input" id="ano_fabricacao" name="ano_fabricacao" inputmode="numeric" maxlength="4" required placeholder="2024"></div>
+            <div class="field"><label for="ano_modelo">Ano modelo *</label><input class="input" id="ano_modelo" name="ano_modelo" inputmode="numeric" maxlength="4" required placeholder="2024"></div>
+            <div class="field"><label for="placa">Placa (privada)</label><input class="input" id="placa" name="placa" data-mask="plate" placeholder="Opcional"><span class="hint">Não aparece no site. Se preferir, informe só os 3 últimos dígitos.</span></div>
+            <div class="field"><label for="cor">Cor</label><input class="input" id="cor" name="cor" list="lista-cores" placeholder="Ex.: Cinza"><datalist id="lista-cores"><option>Branco</option><option>Preto</option><option>Prata</option><option>Cinza</option><option>Vermelho</option><option>Azul</option><option>Verde</option><option>Marrom</option><option>Bege</option><option>Amarelo</option></datalist></div>
+            <div class="field"><label for="portas">Portas</label><select class="select" id="portas" name="portas"><option value="">—</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 data-i="gauge">Características</h2>
+          <div class="grid-fields">
+            <div class="field"><label for="km">Quilometragem *</label><input class="input" id="km" name="km" data-mask="km" inputmode="numeric" required placeholder="0"></div>
+            <div class="field"><label for="cambio">Câmbio *</label><select class="select" id="cambio" name="cambio" required></select></div>
+            <div class="field"><label for="combustivel">Combustível</label><select class="select" id="combustivel" name="combustivel"></select></div>
+            <div class="field"><label for="carroceria">Carroceria</label><select class="select" id="carroceria" name="carroceria"></select></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 data-i="banknote">Preço</h2>
+          <div class="grid-fields">
+            <div class="field"><label for="preco">Valor anunciado (R$) *</label><input class="input" id="preco" name="preco" data-mask="money" inputmode="numeric" placeholder="0,00"></div>
+            <div class="field span-2" style="justify-content:flex-end"><label class="check"><input type="checkbox" id="consulte" name="consulte"> Exibir “Consulte” no lugar do preço</label></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 data-i="image">Fotos</h2>
+          <div class="dropzone" id="dz" role="button" tabindex="0" aria-describedby="dz-info">
+            <span class="ic" data-i="upload"></span>
+            <strong>Arraste as fotos aqui ou clique para escolher</strong>
+            <span id="dz-info">Até 30 fotos JPEG, PNG ou WebP. Reduzimos o tamanho automaticamente antes de enviar. A primeira foto é a capa — arraste para reordenar.</span>
+            <input type="file" id="fotos-input" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          </div>
+          <div class="progress" id="progress"><span></span></div>
+          <p class="hint" id="progress-txt" style="margin-top:6px"></p>
+          <div class="photo-grid" id="photo-grid"></div>
+        </section>
+
+        <section class="card">
+          <h2 data-i="check-circle">Opcionais</h2>
+          <div class="opc-check" id="opcionais"></div>
+          <div class="inline-add"><label class="sr-only" for="opc-novo">Adicionar opcional</label><input class="input" id="opc-novo" placeholder="Adicionar outro opcional"><button type="button" class="btn btn-outline btn-sm" id="opc-add">Adicionar</button></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head" style="margin-bottom:12px"><h2 data-i="file" style="margin:0">Descrição do anúncio</h2><button type="button" class="btn btn-outline btn-xs" id="gerar" data-i="sparkles">Gerar texto base</button></div>
+          <div class="field"><label class="sr-only" for="descricao">Descrição</label><textarea class="textarea" id="descricao" name="descricao" maxlength="3000" rows="7" placeholder="Conte os diferenciais do veículo: revisões, estado, garantia…"></textarea></div>
+          <p class="counter-chars"><span id="desc-n">0</span>/3000</p>
+        </section>
+
+        <section class="card">
+          <h2 data-i="eye">Publicação</h2>
+          <div class="grid-fields">
+            <div class="field"><label for="status">Status</label><select class="select" id="status" name="status"><option value="disponivel">Disponível</option><option value="reservado">Reservado</option><option value="vendido">Vendido</option><option value="oculto">Oculto</option></select></div>
+            <div class="field"><label for="vendedor_id">Vendedor responsável</label><select class="select" id="vendedor_id" name="vendedor_id"><option value="">—</option></select></div>
+            <div class="field" style="justify-content:flex-end"><label class="switch"><input type="checkbox" id="destaque" name="destaque"><span class="tr"></span> Destaque na home</label></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="preview-col">
+        <p class="eyebrow" style="margin-bottom:10px">Prévia no site</p>
+        <div id="preview"></div>
+        <p class="hint" style="margin-top:10px">Assim o card aparece no estoque e na home.</p>
+      </aside>
+    </div>
+
+    <div class="save-bar">
+      <span class="msg" id="save-msg">Campos com * são obrigatórios.</span>
+      <a class="btn btn-ghost btn-sm" id="ver-site" href="#" target="_blank" rel="noopener" hidden>Ver no site ↗</a>
+      <button type="button" class="btn btn-outline btn-sm" id="salvar-outro">Salvar e cadastrar outro</button>
+      <button type="submit" class="btn btn-primary btn-sm" id="salvar">Salvar</button>
+    </div>
+  </form>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, icon = A.icon;
+  var MAX_FOTOS = 30;
+  var MARCAS = ['Audi', 'BMW', 'BYD', 'Caoa Chery', 'Chevrolet', 'Citroën', 'DAF', 'Fiat', 'Ford', 'GWM', 'Honda', 'Hyundai', 'Iveco', 'JAC', 'Jeep', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan', 'Peugeot', 'Porsche', 'RAM', 'Renault', 'Scania', 'Suzuki', 'Toyota', 'Volkswagen', 'Volvo', 'Yamaha', 'Honda Motos'];
+  var OPCIONAIS = ['Ar-condicionado', 'Direção elétrica', 'Direção hidráulica', 'Vidros elétricos', 'Travas elétricas', 'Multimídia', 'Câmera de ré', 'Sensor de estacionamento', 'Bancos de couro', 'Teto solar', 'Rodas de liga', 'Airbags', 'Freios ABS', 'Controle de estabilidade', 'Piloto automático', 'Chave presencial', 'Faróis de LED', 'Tração 4x4', 'Único dono', 'IPVA pago', 'Revisões na concessionária'];
+
+  var id = new URLSearchParams(location.search).get('id');
+  var sb, original = null, fotos = [], removidas = [], pasta = id || Admin.uuid(), sujo = false, enviando = 0;
+  var F = A.qs('#vform');
+
+  A.qsa('[data-i]').forEach(function (el) { el.insertAdjacentHTML('afterbegin', icon(el.getAttribute('data-i'))); });
+  A.qs('#lista-marcas').innerHTML = MARCAS.map(function (m) { return '<option value="' + esc(m) + '">'; }).join('');
+  A.qs('#cambio').innerHTML = '<option value="">Selecione</option>' + Admin.CAMBIOS.map(function (c) { return '<option>' + c + '</option>'; }).join('');
+  A.qs('#combustivel').innerHTML = '<option value="">—</option>' + Admin.COMBUSTIVEIS.map(function (c) { return '<option>' + c + '</option>'; }).join('');
+  A.qs('#carroceria').innerHTML = '<option value="">—</option>' + Admin.CARROCERIAS.map(function (c) { return '<option>' + c + '</option>'; }).join('');
+  renderOpcionais([]);
+
+  Admin.init({ page: 'veiculos', title: id ? 'Editar veículo' : 'Novo veículo', crumbs: [{ label: 'Veículos', href: 'veiculos.html' }, { label: id ? 'Editar' : 'Novo' }] }).then(function (ctx) {
+    sb = ctx.sb;
+    Admin.vendedores().then(function (vs) {
+      A.qs('#vendedor_id').innerHTML = '<option value="">—</option>' + vs.map(function (v) { return '<option value="' + v.id + '">' + esc(v.nome) + '</option>'; }).join('');
+      if (original) A.qs('#vendedor_id').value = original.vendedor_id || '';
+    });
+    if (!id) { A.applyMasks(F); preview(); return; }
+    sb.from('veiculos').select('*,veiculo_fotos(id,url,path,ordem)').eq('id', id).maybeSingle().then(function (r) {
+      if (r.error || !r.data) { A.toast('Veículo não encontrado.'); setTimeout(function () { location.href = 'veiculos.html'; }, 1200); return; }
+      original = r.data; preencher(original);
+    });
+  });
+
+  function preencher(v) {
+    ['marca', 'modelo', 'versao', 'ano_fabricacao', 'ano_modelo', 'placa', 'cor', 'cambio', 'combustivel', 'carroceria', 'status', 'descricao'].forEach(function (k) { if (F.elements[k]) F.elements[k].value = v[k] == null ? '' : v[k]; });
+    F.elements.portas.value = v.portas || '';
+    F.elements.km.value = A.maskInt(String(v.km || 0)) || '0';
+    F.elements.preco.value = v.preco ? A.money(v.preco) : '';
+    F.elements.consulte.checked = !!v.consulte;
+    F.elements.destaque.checked = !!v.destaque;
+    A.qs('#vendedor_id').value = v.vendedor_id || '';
+    renderOpcionais(v.opcionais || []);
+    fotos = (v.veiculo_fotos || []).sort(function (a, b) { return a.ordem - b.ordem; }).map(function (f) { return { url: f.url, path: f.path, salvo: true }; });
+    renderFotos();
+    A.qs('#ver-site').href = '../veiculo.html?id=' + encodeURIComponent(v.id); A.qs('#ver-site').hidden = false;
+    A.applyMasks(F); contar(); preview(); sujo = false;
+  }
+
+  /* ---------- opcionais ---------- */
+  function renderOpcionais(marcados) {
+    var lista = OPCIONAIS.slice();
+    marcados.forEach(function (o) { if (lista.indexOf(o) < 0) lista.push(o); });
+    A.qs('#opcionais').innerHTML = lista.map(function (o, i) {
+      return '<label><input type="checkbox" name="opcional" value="' + esc(o) + '"' + (marcados.indexOf(o) > -1 ? ' checked' : '') + '> ' + esc(o) + '</label>';
+    }).join('');
+  }
+  function opcionaisMarcados() { return A.qsa('input[name=opcional]:checked').map(function (c) { return c.value; }); }
+  A.qs('#opc-add').addEventListener('click', function () {
+    var v = A.qs('#opc-novo').value.trim(); if (!v) return;
+    var m = opcionaisMarcados(); if (m.indexOf(v) < 0) m.push(v);
+    renderOpcionais(m); A.qs('#opc-novo').value = ''; sujo = true;
+  });
+  A.qs('#opc-novo').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); A.qs('#opc-add').click(); } });
+
+  /* ---------- descrição ---------- */
+  function contar() { A.qs('#desc-n').textContent = A.qs('#descricao').value.length; }
+  A.qs('#descricao').addEventListener('input', contar);
+  A.qs('#gerar').addEventListener('click', function () {
+    var v = dados(), L = SITE_CONFIG.loja;
+    var partes = [v.marca, v.modelo, v.versao].filter(Boolean).join(' ');
+    var txt = partes + (v.ano_fabricacao ? ' ' + v.ano_fabricacao + '/' + v.ano_modelo : '') + ', ' +
+      (v.km === 0 ? 'zero quilômetro' : A.nfInt.format(v.km || 0) + ' km rodados') +
+      (v.cambio ? ', câmbio ' + v.cambio.toLowerCase() : '') + (v.combustivel ? ', ' + v.combustivel.toLowerCase() : '') + (v.cor ? ', na cor ' + v.cor.toLowerCase() : '') + '.';
+    if (v.opcionais.length) txt += '\n\nDestaques: ' + v.opcionais.join(', ') + '.';
+    txt += '\n\nVeículo revisado e com procedência verificada pela equipe ' + L.nome + '. Aceitamos seu usado na troca e facilitamos o financiamento. Agende sua visita ou fale com a gente pelo WhatsApp!';
+    var ta = A.qs('#descricao');
+    if (ta.value.trim()) {
+      Admin.confirmar('Substituir o texto atual pelo texto base?', { title: 'Gerar texto base', confirmText: 'Substituir' }).then(function (ok) { if (ok) { ta.value = txt; contar(); sujo = true; } });
+    } else { ta.value = txt; contar(); sujo = true; }
+  });
+
+  /* ---------- fotos ---------- */
+  var dz = A.qs('#dz'), inp = A.qs('#fotos-input'), grid = A.qs('#photo-grid');
+  dz.addEventListener('click', function () { inp.click(); });
+  dz.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
+  ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('is-over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('is-over'); }); });
+  dz.addEventListener('drop', function (e) { adicionar(e.dataTransfer.files); });
+  inp.addEventListener('change', function () { adicionar(inp.files); inp.value = ''; });
+
+  function adicionar(lista) {
+    var arr = Array.prototype.filter.call(lista, function (f) {
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { A.toast('"' + f.name + '" não é JPEG, PNG ou WebP.'); return false; }
+      return true;
+    });
+    var livres = MAX_FOTOS - fotos.length;
+    if (arr.length > livres) { A.toast('Limite de ' + MAX_FOTOS + ' fotos por veículo.'); arr = arr.slice(0, Math.max(0, livres)); }
+    if (!arr.length) return;
+    var total = arr.length, feitos = 0;
+    var prog = A.qs('#progress'), bar = prog.querySelector('span'), txt = A.qs('#progress-txt');
+    prog.classList.add('is-on'); bar.style.width = '4%'; txt.textContent = 'Enviando 0 de ' + total + '…';
+    enviando += total; sujo = true;
+    // fila sequencial (estável em conexões móveis)
+    arr.reduce(function (p, f) {
+      return p.then(function () {
+        var item = { url: URL.createObjectURL(f), enviando: true };
+        fotos.push(item); renderFotos();
+        return Admin.comprimir(f, 1600, 0.8).then(function (blob) {
+          return Admin.uploadPublico('veiculos', pasta + '/' + Admin.uuid() + '.webp', blob);
+        }).then(function (up) {
+          URL.revokeObjectURL(item.url); item.url = up.url; item.path = up.path; item.enviando = false; item.novo = true;
+        }).catch(function (e) {
+          fotos.splice(fotos.indexOf(item), 1); Admin.erro(e, 'Falha ao enviar "' + f.name + '".');
+        }).then(function () {
+          feitos++; enviando--; bar.style.width = Math.round(feitos / total * 100) + '%';
+          txt.textContent = feitos < total ? 'Enviando ' + feitos + ' de ' + total + '…' : total + (total === 1 ? ' foto enviada.' : ' fotos enviadas.');
+          renderFotos(); preview();
+        });
+      });
+    }, Promise.resolve()).then(function () { setTimeout(function () { prog.classList.remove('is-on'); }, 1200); });
+  }
+
+  function renderFotos() {
+    grid.innerHTML = fotos.map(function (f, i) {
+      return '<div class="photo-item" draggable="' + !f.enviando + '" data-i="' + i + '">' +
+        (i === 0 ? '<span class="capa">Capa</span>' : '') +
+        '<img src="' + esc(f.url) + '" alt="Foto ' + (i + 1) + '">' +
+        (f.enviando ? '<div class="up"><span class="spinner" style="width:18px;height:18px;border:2px solid var(--primary);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></span></div>' : '') +
+        '<div class="bar">' +
+        (i > 0 ? '<button type="button" data-capa="' + i + '" title="Definir como capa">' + icon('star') + 'Capa</button>' : '<span class="hint" style="padding:4px 6px">Foto 1</span>') +
+        '<span style="display:flex;gap:2px"><button type="button" data-mv="' + i + '" data-d="-1" aria-label="Mover para a esquerda"' + (i === 0 ? ' disabled' : '') + '>' + icon('chevron-left') + '</button>' +
+        '<button type="button" data-mv="' + i + '" data-d="1" aria-label="Mover para a direita"' + (i === fotos.length - 1 ? ' disabled' : '') + '>' + icon('chevron-right') + '</button>' +
+        '<button type="button" data-rm="' + i + '" aria-label="Remover foto">' + icon('trash') + '</button></span></div></div>';
+    }).join('');
+  }
+  function mover(de, para) { if (para < 0 || para >= fotos.length) return; var f = fotos.splice(de, 1)[0]; fotos.splice(para, 0, f); sujo = true; renderFotos(); preview(); }
+  grid.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-capa]'); if (c) { mover(Number(c.getAttribute('data-capa')), 0); A.toast('Foto definida como capa.'); return; }
+    var m = e.target.closest('[data-mv]'); if (m) { var i = Number(m.getAttribute('data-mv')); mover(i, i + Number(m.getAttribute('data-d'))); return; }
+    var r = e.target.closest('[data-rm]');
+    if (r) {
+      var f = fotos.splice(Number(r.getAttribute('data-rm')), 1)[0];
+      if (f.path) { if (f.novo) sb.storage.from('veiculos').remove([f.path]); else removidas.push(f.path); }
+      sujo = true; renderFotos(); preview();
+    }
+  });
+  var dragI = null;
+  grid.addEventListener('dragstart', function (e) { var it = e.target.closest('.photo-item'); if (!it) return; dragI = Number(it.getAttribute('data-i')); it.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragI); } catch (x) {} });
+  grid.addEventListener('dragover', function (e) { var it = e.target.closest('.photo-item'); if (dragI === null || !it) return; e.preventDefault(); A.qsa('.photo-item.over', grid).forEach(function (x) { x.classList.remove('over'); }); it.classList.add('over'); });
+  grid.addEventListener('drop', function (e) { var it = e.target.closest('.photo-item'); if (dragI === null || !it) return; e.preventDefault(); e.stopPropagation(); mover(dragI, Number(it.getAttribute('data-i'))); dragI = null; });
+  grid.addEventListener('dragend', function () { dragI = null; A.qsa('.photo-item', grid).forEach(function (x) { x.classList.remove('dragging', 'over'); }); });
+
+  /* ---------- dados / prévia ---------- */
+  function dados() {
+    var g = function (n) { return String(F.elements[n].value || '').trim(); };
+    return {
+      marca: g('marca'), modelo: g('modelo'), versao: g('versao').toUpperCase(), ano_fabricacao: Number(A.onlyDigits(g('ano_fabricacao'))) || null,
+      ano_modelo: Number(A.onlyDigits(g('ano_modelo'))) || null, placa: g('placa') || null, cor: g('cor') || null, portas: Number(g('portas')) || null,
+      km: A.parseIntBR(g('km')), cambio: g('cambio'), combustivel: g('combustivel') || null, carroceria: g('carroceria') || null,
+      preco: A.parseMoney(g('preco')) || 0, consulte: F.elements.consulte.checked, opcionais: opcionaisMarcados(), descricao: g('descricao'),
+      status: g('status'), destaque: F.elements.destaque.checked, vendedor_id: g('vendedor_id') || null
+    };
+  }
+  function preview() {
+    var d = dados();
+    var v = { id: id || 'previa', marca: d.marca || 'Marca', modelo: d.modelo || 'Modelo', versao: d.versao || 'VERSÃO', anoFabricacao: d.ano_fabricacao || '----', anoModelo: d.ano_modelo || '----',
+      km: d.km || 0, cambio: d.cambio || 'Câmbio', preco: d.preco, consulte: d.consulte, status: d.status, fotos: fotos.filter(function (f) { return !f.enviando; }).map(function (f) { return f.url; }) };
+    A.qs('#preview').innerHTML = A.cardVeiculo(v, { reveal: false, href: '#' });
+  }
+  F.addEventListener('input', function () { sujo = true; preview(); });
+  F.addEventListener('change', function () { sujo = true; preview(); });
+  ['ano_fabricacao', 'ano_modelo'].forEach(function (n) { F.elements[n].addEventListener('input', function () { this.value = A.onlyDigits(this.value).slice(0, 4); }); });
+  F.elements.ano_fabricacao.addEventListener('blur', function () { if (this.value && !F.elements.ano_modelo.value) F.elements.ano_modelo.value = this.value; });
+
+  window.addEventListener('beforeunload', function (e) { if (sujo) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- validação e salvar ---------- */
+  function erro(nome, msg) {
+    var el = F.elements[nome], f = el && el.closest('.field');
+    if (!f) return;
+    var s = f.querySelector('.field-error'); if (!s) { s = document.createElement('span'); s.className = 'field-error'; f.appendChild(s); }
+    s.textContent = msg; f.classList.toggle('has-error', !!msg);
+  }
+  function validar(d) {
+    var ok = true, ano = new Date().getFullYear() + 2;
+    A.qsa('.has-error', F).forEach(function (x) { x.classList.remove('has-error'); });
+    if (!d.marca) { erro('marca', 'Informe a marca.'); ok = false; }
+    if (!d.modelo) { erro('modelo', 'Informe o modelo.'); ok = false; }
+    if (!d.ano_fabricacao || d.ano_fabricacao < 1950 || d.ano_fabricacao > ano) { erro('ano_fabricacao', 'Ano inválido.'); ok = false; }
+    if (!d.ano_modelo || d.ano_modelo < 1950 || d.ano_modelo > ano) { erro('ano_modelo', 'Ano inválido.'); ok = false; }
+    if (d.km === null) { erro('km', 'Informe a quilometragem (0 para 0 km).'); ok = false; }
+    if (!d.cambio) { erro('cambio', 'Escolha o câmbio.'); ok = false; }
+    if (!d.consulte && !d.preco) { erro('preco', 'Informe o preço ou marque “Consulte”.'); ok = false; }
+    if (!ok) { var first = A.qs('.has-error', F); first.scrollIntoView({ behavior: 'smooth', block: 'center' }); A.toast('Confira os campos destacados.'); return false; }
+    if (d.status === 'disponivel' && !fotos.length) { A.toast('Adicione pelo menos 1 foto para publicar como Disponível.', 3500); A.qs('#dz').scrollIntoView({ behavior: 'smooth', block: 'center' }); return false; }
+    if (enviando > 0) { A.toast('Aguarde o envio das fotos terminar.'); return false; }
+    return true;
+  }
+
+  function salvar(eOutro) {
+    var d = dados();
+    if (!validar(d)) return;
+    var btns = [A.qs('#salvar'), A.qs('#salvar-outro')]; btns.forEach(function (b) { b.disabled = true; });
+    A.qs('#save-msg').textContent = 'Salvando…';
+    if (d.status === 'vendido' && (!original || original.status !== 'vendido')) { d.vendido_em = new Date().toISOString().slice(0, 10); d.destaque = false; }
+    var vid = id, op;
+    if (id) op = sb.from('veiculos').update(d).eq('id', id);
+    else {
+      vid = Admin.slug(d.marca + ' ' + d.modelo + ' ' + (d.versao || '').split(' ')[0] + ' ' + d.ano_modelo) + '-' + Math.random().toString(36).slice(2, 6);
+      d.id = vid; op = sb.from('veiculos').insert(d);
+    }
+    op.then(function (r) {
+      if (r.error) throw r.error;
+      return sb.from('veiculo_fotos').delete().eq('veiculo_id', vid);
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      var rows = fotos.map(function (f, i) { return { veiculo_id: vid, url: f.url, path: f.path || null, ordem: i }; });
+      return rows.length ? sb.from('veiculo_fotos').insert(rows) : { error: null };
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      if (removidas.length) sb.storage.from('veiculos').remove(removidas);
+      removidas = []; sujo = false;
+      fotos.forEach(function (f) { f.novo = false; f.salvo = true; });
+      A.toast('Veículo salvo.');
+      if (eOutro) { setTimeout(function () { location.href = 'veiculo-form.html'; }, 500); return; }
+      if (!id) { id = vid; history.replaceState(null, '', 'veiculo-form.html?id=' + encodeURIComponent(vid)); A.qs('.adm-top h1').textContent = 'Editar veículo'; }
+      original = Object.assign({ id: vid }, d);
+      A.qs('#ver-site').href = '../veiculo.html?id=' + encodeURIComponent(vid); A.qs('#ver-site').hidden = false;
+      A.qs('#save-msg').textContent = 'Salvo às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '.';
+    }).catch(function (e) {
+      Admin.erro(e, 'Não foi possível salvar.'); A.qs('#save-msg').textContent = 'Não salvo.';
+    }).then(function () { btns.forEach(function (b) { b.disabled = false; }); });
+  }
+  F.addEventListener('submit', function (e) { e.preventDefault(); salvar(false); });
+  A.qs('#salvar-outro').addEventListener('click', function () { salvar(true); });
+})();
+</script>
+</body>
+</html>

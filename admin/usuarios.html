@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usuários e acessos | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <p class="muted" style="margin-bottom:16px">Quem pode entrar no painel. <strong>Administrador</strong> acessa tudo; <strong>Vendedor</strong> cuida de veículos e dos próprios leads.</p>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead><tr><th>Usuário</th><th>E-mail</th><th>Função</th><th>Último acesso</th><th>Acesso</th><th style="text-align:right">Ações</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="6" class="empty-row">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, icon = A.icon, C = SITE_CONFIG;
+  var sb, me, lista = [];
+  var REDIRECT = location.href.split('?')[0].replace(/usuarios\.html$/, 'recuperar-senha.html');
+
+  Admin.init({ page: 'usuarios', adminOnly: true, title: 'Usuários e acessos', crumbs: [{ label: 'Usuários' }], action: { label: 'Convidar usuário', href: '#', id: 'convidar', icon: 'mail' } }).then(function (ctx) {
+    sb = ctx.sb; me = ctx.profile;
+    A.qs('#convidar').addEventListener('click', function (e) { e.preventDefault(); convidar(); });
+    carregar();
+  });
+
+  function carregar() {
+    return sb.from('profiles').select('*').order('nome').then(function (r) {
+      if (r.error) return Admin.erro(r.error);
+      lista = r.data; render();
+    });
+  }
+  function adminsAtivos() { return lista.filter(function (u) { return u.funcao === 'admin' && u.ativo; }).length; }
+
+  function render() {
+    A.qs('#tbody').innerHTML = lista.map(function (u) {
+      var eu = u.id === me.id;
+      return '<tr data-id="' + u.id + '">' +
+        '<td class="cell-main"><span style="display:flex;gap:10px;align-items:center">' + Admin.avatar(u, 34) + '<span><strong style="font-family:var(--font-title)">' + esc(u.nome || '—') + '</strong>' + (eu ? ' <span class="hint">(você)</span>' : '') + (u.trocar_senha ? '<br><span class="hint">Precisa trocar a senha no 1º acesso</span>' : '') + '</span></span></td>' +
+        '<td data-label="E-mail">' + esc(u.email || '') + '</td>' +
+        '<td data-label="Função"><select class="select" data-funcao aria-label="Função"' + (eu ? ' disabled title="Você não pode alterar a própria função"' : '') + '><option value="admin"' + (u.funcao === 'admin' ? ' selected' : '') + '>Administrador</option><option value="vendedor"' + (u.funcao === 'vendedor' ? ' selected' : '') + '>Vendedor</option></select></td>' +
+        '<td data-label="Último acesso" class="muted">' + (u.ultimo_acesso ? A.relTime(u.ultimo_acesso) : 'nunca acessou') + '</td>' +
+        '<td data-label="Acesso"><label class="switch"><input type="checkbox" data-ativo' + (u.ativo ? ' checked' : '') + (eu ? ' disabled' : '') + '><span class="tr"></span>' + (u.ativo ? 'Ativo' : 'Inativo') + '</label></td>' +
+        '<td><div class="actions"><button type="button" class="btn btn-outline btn-xs" data-reenviar>' + icon('mail') + ' Reenviar convite</button></div></td></tr>';
+    }).join('');
+  }
+
+  function atualizar(id, campos, msg) {
+    return sb.from('profiles').update(campos).eq('id', id).then(function (r) {
+      if (r.error) throw r.error; A.toast(msg); return carregar();
+    }).catch(function (e) { Admin.erro(e); carregar(); });
+  }
+
+  A.qs('#tbody').addEventListener('change', function (e) {
+    var tr = e.target.closest('tr'), id = tr.getAttribute('data-id'), u = lista.filter(function (x) { return x.id === id; })[0];
+    if (e.target.matches('[data-funcao]')) {
+      if (u.funcao === 'admin' && e.target.value !== 'admin' && adminsAtivos() <= 1) { A.toast('Não é possível remover o último Administrador.'); e.target.value = 'admin'; return; }
+      atualizar(id, { funcao: e.target.value }, 'Função atualizada.');
+    }
+    if (e.target.matches('[data-ativo]')) {
+      if (!e.target.checked && u.funcao === 'admin' && adminsAtivos() <= 1) { A.toast('Não é possível desativar o último Administrador.'); e.target.checked = true; return; }
+      atualizar(id, { ativo: e.target.checked }, e.target.checked ? 'Acesso ativado.' : 'Acesso desativado. O histórico foi mantido.');
+    }
+  });
+  A.qs('#tbody').addEventListener('click', function (e) {
+    if (!e.target.closest('[data-reenviar]')) return;
+    var u = lista.filter(function (x) { return x.id === e.target.closest('tr').getAttribute('data-id'); })[0];
+    sb.auth.resetPasswordForEmail(u.email, { redirectTo: REDIRECT }).then(function (r) {
+      if (r.error) return Admin.erro(r.error, 'Não foi possível enviar o e-mail.');
+      A.toast('Link para criar/redefinir a senha enviado para ' + u.email + '.');
+    });
+  });
+
+  function senhaAleatoria() {
+    var a = new Uint32Array(4); crypto.getRandomValues(a);
+    return Array.prototype.map.call(a, function (n) { return n.toString(36); }).join('') + 'Aa1!';
+  }
+
+  /* Plano A: Edge Function "admin-usuarios" (convite oficial por e-mail).
+     Plano B (sem a função publicada): cria a conta com signUp num cliente
+     temporário e ativa o perfil. Requer "Allow new users to sign up" ligado. */
+  function criarViaSignup(d) {
+    var tmp = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'vs-tmp' } });
+    var senha = d.modo === 'senha' ? d.senha : senhaAleatoria();
+    return tmp.auth.signUp({ email: d.email, password: senha, options: { data: { nome: d.nome }, emailRedirectTo: REDIRECT } }).then(function (r) {
+      if (r.error) throw r.error;
+      if (!r.data.user || (r.data.user.identities && r.data.user.identities.length === 0)) throw new Error('Este e-mail já tem cadastro. Use “Reenviar convite”.');
+      var uid = r.data.user.id;
+      return sb.from('profiles').update({ nome: d.nome, funcao: d.funcao, ativo: true, trocar_senha: d.modo === 'senha' }).eq('id', uid).then(function (u) {
+        if (u.error) throw u.error;
+        if (d.modo === 'convite') return sb.auth.resetPasswordForEmail(d.email, { redirectTo: REDIRECT });
+      });
+    });
+  }
+
+  function convidar() {
+    Admin.modal({
+      title: 'Convidar usuário',
+      body: '<div class="field"><label for="c-nome">Nome *</label><input class="input" id="c-nome" required></div>' +
+        '<div class="field"><label for="c-email">E-mail *</label><input class="input" type="email" id="c-email" required></div>' +
+        '<div class="field"><label for="c-funcao">Função</label><select class="select" id="c-funcao"><option value="vendedor">Vendedor</option><option value="admin">Administrador</option></select></div>' +
+        '<div class="field"><span class="label">Como a pessoa vai criar a senha?</span><div class="radio-row" style="flex-direction:column">' +
+        '<label><input type="radio" name="modo" value="convite" checked> Enviar convite por e-mail (a pessoa cria a própria senha)</label>' +
+        '<label><input type="radio" name="modo" value="senha"> Definir senha provisória (troca obrigatória no 1º acesso)</label></div></div>' +
+        '<div class="field" id="c-senha-box" hidden><label for="c-senha">Senha provisória (mín. 8 caracteres)</label><input class="input" id="c-senha" autocomplete="new-password"></div>',
+      confirmText: 'Convidar',
+      onOpen: function (m) {
+        A.qsa('input[name=modo]', m).forEach(function (r) { r.addEventListener('change', function () { A.qs('#c-senha-box', m).hidden = A.qs('input[name=modo]:checked', m).value !== 'senha'; }); });
+      },
+      onConfirm: function (m) {
+        var d = { nome: A.qs('#c-nome', m).value.trim(), email: A.qs('#c-email', m).value.trim().toLowerCase(), funcao: A.qs('#c-funcao', m).value, modo: A.qs('input[name=modo]:checked', m).value, senha: A.qs('#c-senha', m).value };
+        if (!d.nome) { A.toast('Informe o nome.'); return false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) { A.toast('Informe um e-mail válido.'); return false; }
+        if (d.modo === 'senha' && d.senha.length < 8) { A.toast('A senha provisória precisa ter 8 caracteres ou mais.'); return false; }
+        return sb.functions.invoke('admin-usuarios', { body: { acao: d.modo === 'senha' ? 'criar' : 'convidar', nome: d.nome, email: d.email, funcao: d.funcao, senha: d.senha, redirectTo: REDIRECT } })
+          .then(function (r) {
+            if (r.error) {
+              var st = r.error.context && r.error.context.status;
+              // função não publicada → plano B
+              if (!st || st === 404) return criarViaSignup(d);
+              return r.error.context.json().then(function (j) { throw new Error(j.erro || 'Falha ao convidar.'); }, function () { throw r.error; });
+            }
+          })
+          .then(function () {
+            A.toast(d.modo === 'senha' ? 'Usuário criado. Passe a senha provisória para ' + d.nome + '.' : 'Convite enviado para ' + d.email + '.', 4000);
+            carregar();
+          });
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

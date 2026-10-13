@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurações da loja | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+<style>
+  .img-field { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .img-field .pv { width: 160px; height: 100px; border-radius: 10px; border: 1px solid var(--border); background: #EEF0F3 center/contain no-repeat; flex: none; }
+  .img-field .pv.dark { background-color: var(--dark); }
+  .img-field .pv.cover { background-size: cover; }
+  .faixa-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+  .faixa-row .field { margin: 0; }
+  .vars code { background: var(--bg-soft); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 12.5px; }
+  .tab-panel[hidden] { display: none; }
+  .img-field .pv-text { width: 160px; height: 100px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; padding: 8px; text-align: center; flex: none; }
+  .img-field .pv-text.dark { background: var(--dark); border-style: solid; }
+  .ident { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+  .ident .preview-sticky { position: sticky; top: 96px; }
+  .cores { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .cor-item { border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .cor-item .top { display: flex; gap: 12px; align-items: center; }
+  .cor-item input[type=color] { width: 52px; height: 52px; border: 1px solid var(--border); border-radius: 10px; padding: 3px; background: #fff; cursor: pointer; flex: none; }
+  .cor-item input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+  .cor-item input[type=color]::-webkit-color-swatch { border: 0; border-radius: 7px; }
+  .cor-item strong { font-family: var(--font-title); display: block; font-size: 14.5px; }
+  .cor-item .desc { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .cor-item .hex { width: 110px; min-height: 38px; padding: 6px 10px; font-family: ui-monospace, monospace; font-size: 14px; text-transform: uppercase; margin-top: 10px; }
+  .cor-item .aviso { font-size: 12.5px; margin-top: 8px; line-height: 1.4; display: flex; gap: 6px; }
+  .cor-item .aviso.ok { color: var(--success); } .cor-item .aviso.warn { color: #9A5B00; } .cor-item .aviso.err { color: var(--danger); font-weight: 700; }
+  .presets { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .preset { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px 5px 6px; background: #fff; font-size: 13px; font-weight: 600; }
+  .preset:hover { border-color: var(--text); }
+  .preset .sw { display: flex; } .preset .sw i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #fff; margin-left: -6px; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+  .preset .sw i:first-child { margin-left: 0; }
+  /* prévia do site */
+  .pv-site { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fff; font-size: 13px; box-shadow: var(--shadow-md); }
+  .pv-site .pv-h { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 8px; }
+  .pv-site .pv-h img { height: 30px; border-radius: 4px; }
+  .pv-site .pv-h .brand-text { font-size: 15px; } .pv-site .pv-h .brand-text small { font-size: 8px; }
+  .pv-site .pill { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 999px; padding: 3px; font-size: 10.5px; font-weight: 700; font-family: var(--font-title); }
+  .pv-site .pill span { padding: 3px 8px; border-radius: 999px; }
+  .pv-site .pill .on { background: var(--primary); color: var(--on-primary); }
+  .pv-site .pill .vd { border: 1px solid var(--primary); color: var(--primary-text); }
+  .pv-site .pv-b { background: var(--bg-soft); padding: 16px 12px; }
+  .pv-site .eyebrow { font-size: 9px; margin-bottom: 4px; }
+  .pv-site h4 { font-size: 19px; margin-bottom: 12px; }
+  .pv-site .row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .pv-site .btn { min-height: 34px; padding: 6px 12px; font-size: 12px; }
+  .pv-site .mini-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .pv-site .mini-card .ph { height: 74px; background: linear-gradient(135deg, var(--dark), var(--dark-2)); position: relative; }
+  .pv-site .mini-card .ph i { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; color: var(--primary-text); font-style: normal; font-size: 12px; }
+  .pv-site .mini-card .bd { padding: 10px 12px; }
+  .pv-site .mini-card strong { font-family: var(--font-title); font-size: 14px; } .pv-site .mini-card strong span { color: var(--primary-text); }
+  .pv-site .mini-card .pr { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; font-family: var(--font-title); font-weight: 800; font-size: 15px; }
+  .pv-site .mini-card .pr span { color: var(--primary-text); }
+  .pv-site .pv-cta { background: var(--primary); color: var(--on-primary); padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-family: var(--font-title); font-weight: 800; font-size: 13px; }
+  .pv-site .pv-cta em { font-style: normal; background: #fff; color: var(--primary-text); border-radius: 6px; padding: 5px 9px; font-size: 11px; white-space: nowrap; }
+  .pv-site .pv-f { background: var(--dark); color: rgba(255,255,255,.75); padding: 12px; font-size: 11.5px; }
+  .pv-site .pv-f b { color: #fff; font-family: var(--font-title); display: block; font-size: 13px; } .pv-site .pv-f a { color: var(--gold); font-weight: 700; }
+  @media (max-width: 1200px) { .ident { grid-template-columns: 1fr; } .ident .preview-sticky { position: static; } }
+  @media (max-width: 640px) { .cores { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .faixa-row { grid-template-columns: 1fr 1fr; } .faixa-row .field:first-child { grid-column: 1 / -1; } }
+</style>
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <div class="tabs" role="tablist" id="tabs">
+    <button type="button" role="tab" class="is-active" data-tab="identidade">Identidade visual</button>
+    <button type="button" role="tab" data-tab="loja">Dados da loja</button>
+    <button type="button" role="tab" data-tab="textos">Textos e imagens</button>
+    <button type="button" role="tab" data-tab="mensagens">Mensagens do WhatsApp</button>
+    <button type="button" role="tab" data-tab="faixas">Faixas de preço</button>
+    <button type="button" role="tab" data-tab="seo">SEO</button>
+  </div>
+
+  <form id="cform" novalidate>
+    <!-- IDENTIDADE VISUAL -->
+    <div class="tab-panel ident" data-panel="identidade">
+      <div>
+        <section class="card">
+          <div class="card-head"><div><h2>Nome e logotipo</h2><p>O nome aparece no título das páginas, no rodapé, nas mensagens do WhatsApp e no Google.</p></div></div>
+          <div class="grid-fields">
+            <div class="field span-2"><label for="nome">Nome da empresa *</label><input class="input" id="nome" required maxlength="60"></div>
+            <div class="field"><label for="complemento">Complemento (opcional)</label><input class="input" id="complemento" placeholder="Ex.: Seminovos" maxlength="40"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><span class="label">Logotipo — para fundo claro (topo do site)</span><div class="img-field" data-img="logo"></div></div>
+            <div class="field"><span class="label">Logotipo — para fundo escuro (painel e login)</span><div class="img-field" data-img="logoClaro" data-dark></div></div>
+          </div>
+          <p class="hint">Dica: use PNG com fundo transparente ou SVG. Sem imagem, o site mostra o nome da empresa escrito com as cores da marca.</p>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><div><h2>Cores do site</h2><p>Escolha qualquer cor na paleta ou digite o código. O site ajusta sozinho os tons de botão e texto para manter a leitura.</p></div>
+            <button type="button" class="btn btn-outline btn-xs" id="restaurar">Restaurar cores originais</button></div>
+          <span class="label" style="display:block;margin-bottom:8px">Combinações prontas</span>
+          <div class="presets" id="presets"></div>
+          <div class="cores" id="cores"></div>
+        </section>
+        <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar identidade visual</button></div>
+      </div>
+      <aside class="preview-sticky">
+        <p class="eyebrow" style="margin-bottom:10px">Prévia ao vivo</p>
+        <div class="pv-site" id="pv-site">
+          <div class="pv-h"><span id="pv-logo"></span><span class="pill"><span class="on">Estoque</span><span>Financiamento</span><span class="vd">Vendedores</span></span></div>
+          <div class="pv-b">
+            <span class="eyebrow">Selecionados para você</span>
+            <h4>Últimas novidades<span class="dot">.</span></h4>
+            <div class="row"><span class="btn btn-primary">Ver estoque <span class="arrow">→</span></span><span class="btn btn-dark">Conheça a loja</span><span class="link-arrow" style="font-size:12px">Saiba mais →</span></div>
+            <div class="mini-card"><div class="ph"><i>♥</i></div><div class="bd"><strong>Jeep <span>Compass</span></strong><div class="hint" style="font-size:10.5px">LONGITUDE 1.3 T270</div>
+              <div class="pr">R$ 137.900,00 <span>→</span></div></div></div>
+          </div>
+          <div class="pv-cta">Vamos encontrar seu próximo carro? <em>Converse com a gente →</em></div>
+          <div class="pv-f"><b id="pv-nome">Vehicle Store</b>Veículos seminovos selecionados. <a>Como chegar ↗</a></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- DADOS DA LOJA -->
+    <section class="card tab-panel" data-panel="loja" hidden>
+      <div class="grid-fields">
+        <div class="field"><label for="telefone">Telefone exibido</label><input class="input" id="telefone" data-mask="phone" inputmode="tel"></div>
+        <div class="field"><label for="whatsapp">WhatsApp principal *</label><input class="input" id="whatsapp" data-mask="phone" inputmode="tel" required></div>
+        <div class="field"><label for="email">E-mail</label><input class="input" id="email" type="email"></div>
+        <div class="field span-2"><label for="endereco">Endereço (rua, nº, bairro, cidade - UF)</label><input class="input" id="endereco"></div>
+        <div class="field"><label for="cep">CEP</label><input class="input" id="cep" inputmode="numeric" maxlength="9"></div>
+        <div class="field span-3"><label for="mapsUrl">Link “Como chegar” (Google Maps)</label><input class="input" id="mapsUrl" type="url" placeholder="https://maps.google.com/…"></div>
+        <div class="field span-3"><label for="horario">Horário de funcionamento</label><input class="input" id="horario"></div>
+        <div class="field"><label for="instagram">Instagram (link)</label><input class="input" id="instagram" type="url" placeholder="https://instagram.com/…"></div>
+        <div class="field"><label for="facebook">Facebook (link)</label><input class="input" id="facebook" type="url" placeholder="https://facebook.com/…"></div>
+      </div>
+      <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button></div>
+    </section>
+
+    <!-- TEXTOS E IMAGENS -->
+    <section class="card tab-panel" data-panel="textos" hidden>
+      <div class="field"><span class="label">Imagem da hero (home)</span><div class="img-field" data-img="heroImg" data-cover></div>
+        <label class="check" style="margin-top:8px"><input type="checkbox" id="heroIlustrativa"> Mostrar o selo “Imagem ilustrativa”</label></div>
+      <div class="grid-2">
+        <div class="field"><span class="label">Imagem da seção “Conheça a loja” (home)</span><div class="img-field" data-img="lojaImg" data-cover></div></div>
+        <div class="field"><span class="label">Imagem da página “A loja”</span><div class="img-field" data-img="paginaLojaImg" data-cover></div></div>
+      </div>
+      <div class="field"><label for="historia">Texto “Nossa história” (página A loja)</label><textarea class="textarea" id="historia" rows="6" placeholder="Se ficar vazio, usamos o texto-padrão."></textarea></div>
+      <div class="field"><label for="rodapeTexto">Texto do rodapé</label><textarea class="textarea" id="rodapeTexto" rows="3" style="min-height:90px"></textarea></div>
+      <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button></div>
+    </section>
+
+    <!-- MENSAGENS -->
+    <section class="card tab-panel" data-panel="mensagens" hidden>
+      <p class="vars hint" style="margin-bottom:16px">Variáveis disponíveis: <code>{nome_loja}</code> <code>{veiculo}</code> <code>{preco}</code> <code>{link}</code> <code>{vendedor}</code></p>
+      <div class="field"><label for="m-geral">Mensagem geral (botões “Fale com a loja”)</label><textarea class="textarea" id="m-geral" rows="3" style="min-height:90px"></textarea></div>
+      <div class="field"><label for="m-veiculo">Interesse em veículo (“Tenho interesse”)</label><textarea class="textarea" id="m-veiculo" rows="3" style="min-height:90px"></textarea></div>
+      <div class="field"><label for="m-vendedor">Contato com vendedor (menu Vendedores)</label><textarea class="textarea" id="m-vendedor" rows="3" style="min-height:90px"></textarea></div>
+      <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button></div>
+    </section>
+
+    <!-- FAIXAS -->
+    <section class="card tab-panel" data-panel="faixas" hidden>
+      <p class="hint" style="margin-bottom:16px">Opções do campo “Quanto quer investir?” na busca da home. Deixe “De” ou “Até” vazio para sem limite.</p>
+      <div id="faixas"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="add-faixa">+ Adicionar faixa</button>
+      <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button></div>
+    </section>
+
+    <!-- SEO -->
+    <section class="card tab-panel" data-panel="seo" hidden>
+      <div class="field"><label for="seo-titulo">Título da home</label><input class="input" id="seo-titulo" maxlength="70"><span class="hint">Até ~60 caracteres. Aparece no Google e na aba do navegador.</span></div>
+      <div class="field"><label for="seo-desc">Descrição da home</label><textarea class="textarea" id="seo-desc" rows="3" maxlength="170" style="min-height:90px"></textarea><span class="hint">Até ~155 caracteres.</span></div>
+      <div class="field"><span class="label">Imagem de compartilhamento (WhatsApp, redes sociais)</span><div class="img-field" data-img="seoImagem" data-cover></div></div>
+      <p class="hint">Obs.: o título e a descrição gravados no HTML ajudam o Google a ler o site mesmo sem JavaScript. Para mudá-los também no HTML, edite o <code>&lt;title&gt;</code> de <code>index.html</code>.</p>
+      <div class="save-row"><button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button></div>
+    </section>
+  </form>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, C = SITE_CONFIG;
+  var sb, imgs = {}, faixas = [], tema = {};
+  var CORES = [
+    { k: 'primaria', nome: 'Cor principal', desc: 'Botões, menu ativo, nome do modelo, preços em destaque e a faixa “Vamos encontrar seu próximo carro?”.' },
+    { k: 'escura', nome: 'Cor escura', desc: 'Rodapé, botão “Conheça nossa loja”, etiqueta “Reservado” e barra lateral do painel.' },
+    { k: 'destaque', nome: 'Cor de detalhe', desc: 'Pequenos detalhes sobre o fundo escuro: links do rodapé e estrela de destaque.' },
+    { k: 'fundo', nome: 'Fundo das seções', desc: 'Fundo claro das áreas de estoque, formulários e seções alternadas.' }
+  ];
+  var PRESETS = [
+    { nome: 'Original da marca', primaria: '#8F6A12', escura: '#0B1128', destaque: '#D4A537', fundo: '#F7F7F8' },
+    { nome: 'Vermelho esportivo', primaria: '#C8102E', escura: '#161616', destaque: '#FF6B6B', fundo: '#F7F7F7' },
+    { nome: 'Azul confiança', primaria: '#1D4ED8', escura: '#0F1B33', destaque: '#60A5FA', fundo: '#F5F7FB' },
+    { nome: 'Verde', primaria: '#15803D', escura: '#0F241A', destaque: '#4ADE80', fundo: '#F5F8F6' },
+    { nome: 'Laranja', primaria: '#EA580C', escura: '#1C1917', destaque: '#FDBA74', fundo: '#FAF8F6' },
+    { nome: 'Grafite e prata', primaria: '#374151', escura: '#111827', destaque: '#D1D5DB', fundo: '#F6F7F8' },
+    { nome: 'Roxo', primaria: '#6D28D9', escura: '#1E1035', destaque: '#C4B5FD', fundo: '#F8F7FB' }
+  ];
+  var Cor = DB.Cor;
+  var CAMPOS_LOJA = ['nome', 'complemento', 'telefone', 'email', 'endereco', 'cep', 'mapsUrl', 'horario', 'instagram', 'facebook', 'historia', 'rodapeTexto'];
+  A.qsa('.save-row').forEach(function (r) { r.style.cssText = 'display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)'; });
+
+  Admin.init({ page: 'configuracoes', adminOnly: true, title: 'Configurações da loja', crumbs: [{ label: 'Configurações' }] }).then(function (ctx) {
+    sb = ctx.sb;
+    // SITE_CONFIG já vem mesclado com o que está salvo no banco (supabase.js)
+    var L = C.loja;
+    CAMPOS_LOJA.forEach(function (k) { var el = A.qs('#' + k); if (el) el.value = L[k] || ''; });
+    A.qs('#whatsapp').value = String(L.whatsapp || '').replace(/^55/, '');
+    A.qs('#heroIlustrativa').checked = !!L.heroIlustrativa;
+    ['logo', 'logoClaro', 'heroImg', 'lojaImg', 'paginaLojaImg'].forEach(function (k) { imgs[k] = L[k] || ''; });
+    imgs.seoImagem = C.seo.imagem || '';
+    A.qs('#m-geral').value = C.mensagens.geral || ''; A.qs('#m-veiculo').value = C.mensagens.veiculo || ''; A.qs('#m-vendedor').value = C.mensagens.vendedor || '';
+    A.qs('#seo-titulo').value = C.seo.titulo || ''; A.qs('#seo-desc').value = C.seo.descricao || '';
+    faixas = (C.faixasPreco || []).map(function (f) { return Object.assign({}, f); });
+    A.applyMasks(document);
+    tema = Object.assign({}, DB.TEMA_PADRAO, C.tema || {});
+    renderImgs(); renderFaixas(); renderPresets(); renderCores(); preview();
+  });
+
+  /* ---------- abas ---------- */
+  A.qs('#tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return;
+    A.qsa('#tabs button').forEach(function (x) { x.classList.toggle('is-active', x === b); x.setAttribute('aria-selected', x === b); });
+    A.qsa('.tab-panel').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== b.getAttribute('data-tab'); });
+  });
+
+  /* ---------- imagens ---------- */
+  function renderImgs() {
+    A.qsa('[data-img]').forEach(function (box) {
+      var k = box.getAttribute('data-img'), url = imgs[k], ehLogo = /^logo/.test(k), dark = box.hasAttribute('data-dark');
+      if (ehLogo) {
+        box.innerHTML = (url ? '<div class="pv' + (dark ? ' dark' : '') + '" style="background-image:url(\'' + esc(A.url(url)) + '\')"></div>'
+            : '<div class="pv-text' + (dark ? ' dark' : '') + '"><span class="brand-text' + (dark ? ' on-dark' : '') + '" style="font-size:17px">' + esc(A.qs('#nome').value || C.loja.nome) + (A.qs('#complemento').value ? '<small>' + esc(A.qs('#complemento').value) + '</small>' : '') + '</span></div>') +
+          '<div style="display:flex;flex-direction:column;gap:6px"><label class="btn btn-outline btn-xs" style="cursor:pointer">' + A.icon('upload') + (url ? ' Trocar logotipo' : ' Enviar logotipo') + '<input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" hidden data-up="' + k + '"></label>' +
+          (url ? '<button type="button" class="btn btn-ghost btn-xs" data-sem-logo="' + k + '">Usar só o nome (sem imagem)</button>' : '<span class="hint">Mostrando o nome em texto.</span>') +
+          '<span class="hint">PNG transparente, SVG, JPEG ou WebP.</span></div>';
+        return;
+      }
+      box.innerHTML = '<div class="pv' + (box.hasAttribute('data-dark') ? ' dark' : '') + (box.hasAttribute('data-cover') ? ' cover' : '') + '" style="background-image:' + (url ? 'url(\'' + esc(A.url(url)) + '\')' : 'none') + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px"><label class="btn btn-outline btn-xs" style="cursor:pointer">' + A.icon('upload') + ' Trocar imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" hidden data-up="' + k + '"></label>' +
+        '<span class="hint">JPEG, PNG, WebP ou SVG.</span></div>';
+    });
+  }
+  document.addEventListener('change', function (e) {
+    var inp = e.target.closest('[data-up]'); if (!inp || !inp.files[0]) return;
+    var k = inp.getAttribute('data-up'), f = inp.files[0];
+    if (f.size > 5 * 1024 * 1024) { A.toast('Imagem muito grande (máx. 5 MB).'); return; }
+    A.toast('Enviando imagem…');
+    var p = f.type === 'image/svg+xml'
+      ? Admin.uploadPublico('site', 'imagens/' + Admin.uuid() + '.svg', f)
+      : Admin.uploadImagemSite(f, 'imagens', /logo/i.test(k) ? 800 : 2000);
+    p.then(function (r) { imgs[k] = r.url; renderImgs(); preview(); A.toast('Imagem enviada. Clique em “Salvar alterações”.'); }).catch(function (er) { Admin.erro(er, 'Falha ao enviar a imagem.'); });
+  });
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sem-logo]'); if (!b) return;
+    imgs[b.getAttribute('data-sem-logo')] = ''; renderImgs(); preview();
+    A.toast('O site vai mostrar o nome em texto. Clique em “Salvar identidade visual”.');
+  });
+  ['nome', 'complemento'].forEach(function (id) { A.qs('#' + id).addEventListener('input', function () { renderImgs(); preview(); }); });
+
+  /* ---------- cores ---------- */
+  function renderPresets() {
+    A.qs('#presets').innerHTML = PRESETS.map(function (p, i) {
+      return '<button type="button" class="preset" data-preset="' + i + '"><span class="sw"><i style="background:' + p.primaria + '"></i><i style="background:' + p.escura + '"></i><i style="background:' + p.destaque + '"></i></span>' + esc(p.nome) + '</button>';
+    }).join('');
+  }
+  function avisos(k) {
+    var v = calc();
+    if (k === 'primaria') {
+      var t = v['--on-primary'] === '#FFFFFF' ? 'branco' : 'escuro';
+      var msg = 'Texto dos botões: ' + t + ' (ajustado automaticamente).';
+      if (v['--primary-text'] !== v['--primary']) return ['warn', 'Cor clara: em textos sobre fundo branco usaremos um tom mais escuro (' + v['--primary-text'] + ') para ficar legível. ' + msg];
+      return ['ok', msg];
+    }
+    if (k === 'escura') {
+      var c = Cor.contraste('#FFFFFF', tema.escura);
+      return c < 4.5 ? ['err', 'Muito clara: o texto branco do rodapé ficaria ilegível. Escolha um tom mais escuro.'] : ['ok', 'Boa leitura do texto branco no rodapé.'];
+    }
+    if (k === 'destaque') {
+      return Cor.contraste(tema.destaque, tema.escura) < 3 ? ['warn', 'Pouco contraste com a cor escura: os links do rodapé ficam difíceis de ver.'] : ['ok', 'Bem visível sobre a cor escura.'];
+    }
+    if (k === 'fundo') {
+      return Cor.contraste('#1F2430', tema.fundo) < 7 ? ['err', 'Muito escura para fundo de conteúdo. Use um tom bem claro (quase branco).'] : ['ok', 'Fundo claro e confortável para leitura.'];
+    }
+  }
+  function renderCores() {
+    A.qs('#cores').innerHTML = CORES.map(function (c) {
+      var a = avisos(c.k);
+      return '<div class="cor-item"><div class="top"><input type="color" data-cor="' + c.k + '" value="' + tema[c.k].toLowerCase() + '" aria-label="' + esc(c.nome) + '">' +
+        '<div><strong>' + esc(c.nome) + '</strong><span class="desc">' + esc(c.desc) + '</span></div></div>' +
+        '<label class="sr-only" for="hex-' + c.k + '">Código da ' + esc(c.nome) + '</label><input class="input hex" id="hex-' + c.k + '" data-hex="' + c.k + '" value="' + tema[c.k] + '" maxlength="7" spellcheck="false">' +
+        '<div class="aviso ' + a[0] + '" data-aviso="' + c.k + '">' + (a[0] === 'ok' ? '✓ ' : '⚠ ') + esc(a[1]) + '</div></div>';
+    }).join('');
+  }
+  function atualizarAvisos() {
+    CORES.forEach(function (c) { var a = avisos(c.k), el = A.qs('[data-aviso="' + c.k + '"]'); el.className = 'aviso ' + a[0]; el.textContent = (a[0] === 'ok' ? '✓ ' : '⚠ ') + a[1]; });
+  }
+  function calc() { return DB.calcularTema(tema); }
+  function preview() {
+    DB.aplicarTema(tema, A.qs('#pv-site'));
+    var L = { logo: imgs.logo, nome: A.qs('#nome').value || C.loja.nome, complemento: A.qs('#complemento').value };
+    A.qs('#pv-logo').innerHTML = L.logo ? '<img src="' + esc(A.url(L.logo)) + '" alt="">' : '<span class="brand-text">' + esc(L.nome) + (L.complemento ? '<small>' + esc(L.complemento) + '</small>' : '') + '</span>';
+    A.qs('#pv-nome').textContent = L.nome;
+  }
+  function setCor(k, v) {
+    v = String(v || '').trim(); if (v && v[0] !== '#') v = '#' + v;
+    if (!Cor.valida(v)) return false;
+    tema[k] = v.toUpperCase();
+    var pick = A.qs('[data-cor="' + k + '"]'), hex = A.qs('[data-hex="' + k + '"]');
+    if (pick) pick.value = tema[k].toLowerCase();
+    if (hex && document.activeElement !== hex) hex.value = tema[k];
+    atualizarAvisos(); preview(); return true;
+  }
+  A.qs('#cores').addEventListener('input', function (e) {
+    var c = e.target.getAttribute('data-cor'); if (c) { setCor(c, e.target.value); return; }
+    var h = e.target.getAttribute('data-hex'); if (h) { e.target.classList.toggle('has-error', !setCor(h, e.target.value) && e.target.value.length >= 7); }
+  });
+  A.qs('#cores').addEventListener('focusout', function (e) { var h = e.target.getAttribute('data-hex'); if (h) e.target.value = tema[h]; });
+  A.qs('#presets').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-preset]'); if (!b) return;
+    var p = PRESETS[Number(b.getAttribute('data-preset'))];
+    CORES.forEach(function (c) { setCor(c.k, p[c.k]); });
+    A.toast('Combinação “' + p.nome + '” aplicada na prévia.');
+  });
+  A.qs('#restaurar').addEventListener('click', function () { CORES.forEach(function (c) { setCor(c.k, DB.TEMA_PADRAO[c.k]); }); A.toast('Cores originais restauradas na prévia.'); });
+
+  /* ---------- faixas ---------- */
+  function renderFaixas() {
+    A.qs('#faixas').innerHTML = faixas.map(function (f, i) {
+      return '<div class="faixa-row" data-i="' + i + '">' +
+        '<div class="field"><label for="fx-r' + i + '">Rótulo</label><input class="input" id="fx-r' + i + '" data-k="rotulo" value="' + esc(f.rotulo || '') + '"></div>' +
+        '<div class="field"><label for="fx-a' + i + '">De (R$)</label><input class="input" id="fx-a' + i + '" data-k="min" data-mask="int" inputmode="numeric" value="' + (f.min != null ? A.nfInt.format(f.min) : '') + '"></div>' +
+        '<div class="field"><label for="fx-b' + i + '">Até (R$)</label><input class="input" id="fx-b' + i + '" data-k="max" data-mask="int" inputmode="numeric" value="' + (f.max != null ? A.nfInt.format(f.max) : '') + '"></div>' +
+        '<button type="button" class="icon-sq" data-rm-faixa="' + i + '" aria-label="Remover faixa" style="margin-bottom:7px">' + A.icon('trash') + '</button></div>';
+    }).join('');
+    A.applyMasks(A.qs('#faixas'));
+  }
+  A.qs('#faixas').addEventListener('input', function (e) {
+    var row = e.target.closest('[data-i]'), k = e.target.getAttribute('data-k'); if (!row || !k) return;
+    var f = faixas[Number(row.getAttribute('data-i'))];
+    f[k] = k === 'rotulo' ? e.target.value : A.parseIntBR(e.target.value);
+  });
+  A.qs('#faixas').addEventListener('click', function (e) { var b = e.target.closest('[data-rm-faixa]'); if (b) { faixas.splice(Number(b.getAttribute('data-rm-faixa')), 1); renderFaixas(); } });
+  A.qs('#add-faixa').addEventListener('click', function () { faixas.push({ rotulo: '', min: null, max: null }); renderFaixas(); });
+
+  /* ---------- salvar ---------- */
+  A.qs('#cform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nome = A.qs('#nome').value.trim(), wa = A.onlyDigits(A.qs('#whatsapp').value);
+    if (!nome) { A.toast('Informe o nome da empresa.'); A.qs('[data-tab=identidade]').click(); A.qs('#nome').focus(); return; }
+    if (avisos('escura')[0] === 'err' || avisos('fundo')[0] === 'err') { A.toast('Ajuste as cores marcadas em vermelho antes de salvar.', 3500); A.qs('[data-tab=identidade]').click(); return; }
+    if (wa.length < 10 || wa.length > 11) { A.toast('Informe o WhatsApp principal com DDD.'); return; }
+    var loja = {};
+    CAMPOS_LOJA.forEach(function (k) { loja[k] = A.qs('#' + k).value.trim(); });
+    loja.whatsapp = '55' + wa;
+    loja.heroIlustrativa = A.qs('#heroIlustrativa').checked;
+    ['logo', 'logoClaro', 'heroImg', 'lojaImg', 'paginaLojaImg'].forEach(function (k) { loja[k] = imgs[k]; });
+    var fx = faixas.filter(function (f) { return f.rotulo && (f.min != null || f.max != null); });
+    var dados = {
+      loja: loja,
+      mensagens: { geral: A.qs('#m-geral').value.trim(), veiculo: A.qs('#m-veiculo').value.trim(), vendedor: A.qs('#m-vendedor').value.trim() },
+      faixasPreco: fx,
+      tema: { primaria: tema.primaria, escura: tema.escura, destaque: tema.destaque, fundo: tema.fundo },
+      seo: { titulo: A.qs('#seo-titulo').value.trim(), descricao: A.qs('#seo-desc').value.trim(), imagem: imgs.seoImagem }
+    };
+    var btn = e.submitter || A.qs('.tab-panel:not([hidden]) [type=submit]');
+    btn.classList.add('is-loading');
+    sb.from('configuracoes').upsert({ id: 1, dados: dados }).then(function (r) {
+      btn.classList.remove('is-loading');
+      if (r.error) return Admin.erro(r.error);
+      // aplica a nova identidade no painel na hora (e guarda para o site não "piscar" a cor antiga)
+      C.tema = dados.tema; DB.aplicarTema(dados.tema);
+      try { localStorage.setItem('vs_tema', JSON.stringify(dados.tema)); } catch (er) {}
+      Object.assign(C.loja, loja);
+      var lg = A.qs('.adm-side .logo'); if (lg) lg.innerHTML = A.marca(true);
+      A.toast('Alterações salvas. Já estão no site.');
+    });
+  });
+})();
+</script>
+</body>
+</html>

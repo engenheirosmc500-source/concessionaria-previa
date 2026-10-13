@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detalhes do veículo | Vehicle Store</title>
+<meta name="description" content="Fotos, ficha técnica, opcionais e preço do veículo. Fale com a Vehicle Store pelo WhatsApp.">
+<meta name="theme-color" content="#0B1128">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Vehicle Store">
+<meta property="og:title" content="Detalhes do veículo | Vehicle Store">
+<meta property="og:description" content="Fotos, ficha técnica, opcionais e preço do veículo. Fale com a Vehicle Store pelo WhatsApp.">
+<meta property="og:image" content="assets/img/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="veiculo">
+<main id="conteudo">
+<section class="area-soft" style="padding-top:28px">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Você está em"><a href="index.html">Início</a> / <a href="estoque.html">Estoque</a> / <span aria-current="page" id="breadcrumb-atual">Carregando…</span></nav>
+    <div id="detalhe" aria-live="polite"></div>
+  </div>
+</section>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotos do veículo">
+  <button type="button" class="close" id="lb-close" aria-label="Fechar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+  <button type="button" class="gal-nav prev" id="lb-prev" aria-label="Foto anterior"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <img id="lb-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="">
+  <button type="button" class="gal-nav next" id="lb-next" aria-label="Próxima foto"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+  <span class="lb-count" id="lb-count"></span>
+</div>
+</main>
+<script src="data/config.js"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/estoque.js"></script>
+</body>
+</html>

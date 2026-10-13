@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veículos | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <div class="tabs" id="tabs" role="tablist" aria-label="Status do veículo"></div>
+
+  <div class="toolbar">
+    <label class="sr-only" for="f-q">Buscar</label>
+    <input class="input grow" id="f-q" placeholder="Buscar por marca, modelo, versão ou placa" autocomplete="off">
+    <label class="sr-only" for="f-marca">Marca</label><select class="select" id="f-marca"><option value="">Todas as marcas</option></select>
+    <label class="sr-only" for="f-carr">Carroceria</label><select class="select" id="f-carr"><option value="">Todas as carrocerias</option></select>
+    <label class="sr-only" for="f-ord">Ordenar</label>
+    <select class="select" id="f-ord">
+      <option value="recentes">Mais recentes</option>
+      <option value="preco-asc">Menor preço</option>
+      <option value="preco-desc">Maior preço</option>
+      <option value="km">Menor km</option>
+      <option value="antigos">Mais antigos no estoque</option>
+    </select>
+  </div>
+
+  <div class="bulk" id="bulk" role="region" aria-label="Ações em massa">
+    <strong id="bulk-n">0 selecionados</strong>
+    <label class="sr-only" for="bulk-status">Mudar status</label>
+    <select class="select" id="bulk-status"><option value="">Mudar status para…</option><option value="disponivel">Disponível</option><option value="reservado">Reservado</option><option value="oculto">Oculto</option></select>
+    <button type="button" class="btn btn-white btn-xs" data-bulk="destacar">Destacar</button>
+    <button type="button" class="btn btn-white btn-xs" data-bulk="tirar">Remover destaque</button>
+    <button type="button" class="btn btn-danger btn-xs" data-bulk="excluir" data-admin hidden>Excluir</button>
+    <button type="button" class="btn btn-ghost btn-xs" style="color:#fff;margin-left:auto" data-bulk="limpar">Cancelar</button>
+  </div>
+
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:36px"><input type="checkbox" id="sel-todos" aria-label="Selecionar todos"></th>
+        <th colspan="2">Veículo</th><th>Ano / Km</th><th>Preço</th><th>Status</th><th>Destaque</th><th>No estoque</th><th style="text-align:right">Ações</th>
+      </tr></thead>
+      <tbody id="tbody"><tr><td colspan="9" class="empty-row">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, icon = A.icon;
+  var params = new URLSearchParams(location.search);
+  var estado = { status: params.get('status') || 'todos', q: params.get('q') || '', marca: '', carr: '', ord: 'recentes' };
+  var todos = [], vendedores = [], sel = {};
+  var sb;
+
+  Admin.init({ page: 'veiculos', title: 'Veículos', crumbs: [{ label: 'Veículos' }], action: { label: 'Novo veículo', href: 'veiculo-form.html' } }).then(function (ctx) {
+    sb = ctx.sb;
+    A.qs('#adm-q').value = estado.q;
+    A.qs('#f-q').value = estado.q;
+    if (Admin.isAdmin) A.qsa('[data-admin]').forEach(function (e) { e.hidden = false; });
+    Admin.vendedores().then(function (v) { vendedores = v; });
+    carregar();
+  });
+
+  function carregar() {
+    return sb.from('veiculos').select('*,veiculo_fotos(url,ordem)').order('created_at', { ascending: false }).then(function (r) {
+      if (r.error) { Admin.erro(r.error); return; }
+      todos = r.data;
+      var marcas = {}; todos.forEach(function (v) { marcas[v.marca] = 1; });
+      var fm = A.qs('#f-marca'), mv = fm.value;
+      fm.innerHTML = '<option value="">Todas as marcas</option>' + Object.keys(marcas).sort().map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('');
+      fm.value = mv;
+      var fc = A.qs('#f-carr'), cv = fc.value;
+      fc.innerHTML = '<option value="">Todas as carrocerias</option>' + Admin.CARROCERIAS.map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('');
+      fc.value = cv;
+      render();
+    });
+  }
+
+  function filtrados(semStatus) {
+    var q = A.norm(estado.q);
+    var l = todos.filter(function (v) {
+      if (!semStatus && estado.status !== 'todos' && v.status !== estado.status) return false;
+      if (estado.marca && v.marca !== estado.marca) return false;
+      if (estado.carr && v.carroceria !== estado.carr) return false;
+      if (q) { var hay = A.norm([v.marca, v.modelo, v.versao, v.placa].join(' ')); if (q.split(/\s+/).some(function (t) { return hay.indexOf(t) < 0; })) return false; }
+      return true;
+    });
+    var f = {
+      recentes: function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); },
+      'preco-asc': function (a, b) { return a.preco - b.preco; },
+      'preco-desc': function (a, b) { return b.preco - a.preco; },
+      km: function (a, b) { return a.km - b.km; },
+      antigos: function (a, b) { return String(a.data_cadastro).localeCompare(String(b.data_cadastro)); }
+    }[estado.ord];
+    return l.sort(f);
+  }
+
+  function render() {
+    // abas
+    var base = filtrados(true), cont = { todos: base.length, disponivel: 0, reservado: 0, vendido: 0, oculto: 0 };
+    base.forEach(function (v) { cont[v.status] = (cont[v.status] || 0) + 1; });
+    var nomes = { todos: 'Todos', disponivel: 'Disponíveis', reservado: 'Reservados', vendido: 'Vendidos', oculto: 'Ocultos' };
+    A.qs('#tabs').innerHTML = Object.keys(nomes).map(function (k) {
+      return '<button type="button" role="tab" aria-selected="' + (estado.status === k) + '" class="' + (estado.status === k ? 'is-active' : '') + '" data-tab="' + k + '">' + nomes[k] + ' <span class="n">' + cont[k] + '</span></button>';
+    }).join('');
+
+    var l = filtrados(false), tb = A.qs('#tbody');
+    if (!todos.length) {
+      tb.innerHTML = '<tr><td colspan="9" class="empty-row">' + icon('car') + '<strong style="display:block;color:var(--text);font-size:16px;margin-bottom:6px">Nenhum veículo cadastrado ainda.</strong>' +
+        'Cadastre o primeiro veículo' + (Admin.isAdmin ? ' ou importe o estoque de demonstração para começar.' : '.') +
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap"><a class="btn btn-primary btn-sm" href="veiculo-form.html">' + icon('plus') + ' Cadastrar veículo</a>' +
+        (Admin.isAdmin ? '<button type="button" class="btn btn-outline btn-sm" id="importar">' + icon('download') + ' Importar estoque de demonstração</button>' : '') + '</div></td></tr>';
+      var bi = A.qs('#importar'); if (bi) bi.addEventListener('click', importarDemo);
+      return;
+    }
+    if (!l.length) { tb.innerHTML = '<tr><td colspan="9" class="empty-row">' + icon('search') + 'Nenhum veículo com esses filtros.</td></tr>'; atualizarBulk(); return; }
+    tb.innerHTML = l.map(function (v) {
+      var dias = Admin.dias(v.data_cadastro);
+      return '<tr data-id="' + esc(v.id) + '">' +
+        '<td class="cell-check"><input type="checkbox" data-sel="' + esc(v.id) + '"' + (sel[v.id] ? ' checked' : '') + ' aria-label="Selecionar ' + esc(v.marca + ' ' + v.modelo) + '"></td>' +
+        '<td class="cell-main" style="width:84px"><img class="thumb" src="' + esc(Admin.capa(v)) + '" alt="" loading="lazy"></td>' +
+        '<td class="cell-main ttl"><a href="veiculo-form.html?id=' + encodeURIComponent(v.id) + '"><strong>' + Admin.titulo(v) + '</strong><small>' + esc(v.versao || '') + (v.placa ? ' · ' + esc(v.placa) : '') + '</small></a></td>' +
+        '<td data-label="Ano / Km" class="num">' + v.ano_fabricacao + '/' + v.ano_modelo + '<br><span class="muted" style="font-size:12.5px">' + A.kmFmt(v.km) + '</span></td>' +
+        '<td data-label="Preço" class="num"><strong>' + (v.consulte ? 'Consulte' : A.moneyBRL(v.preco)) + '</strong></td>' +
+        '<td data-label="Status">' + (v.status === 'vendido' ? Admin.chip('veic', 'vendido') :
+          '<select class="select" data-status="' + esc(v.id) + '" aria-label="Status">' + ['disponivel', 'reservado', 'oculto'].map(function (s) { return '<option value="' + s + '"' + (v.status === s ? ' selected' : '') + '>' + Admin.STATUS_VEIC[s] + '</option>'; }).join('') + '</select>') + '</td>' +
+        '<td data-label="Destaque"><button type="button" class="star-btn' + (v.destaque ? ' is-on' : '') + '" data-star="' + esc(v.id) + '" aria-pressed="' + !!v.destaque + '" aria-label="Destaque na home">' + icon('star') + '</button></td>' +
+        '<td data-label="No estoque" class="num' + (dias > 60 && v.status !== 'vendido' ? '" style="color:var(--danger);font-weight:700' : '') + '">' + (v.status === 'vendido' ? 'vendido ' + Admin.dataBR(v.vendido_em) : dias + ' dias') + '</td>' +
+        '<td><div class="actions">' +
+        '<a class="icon-sq" href="veiculo-form.html?id=' + encodeURIComponent(v.id) + '" aria-label="Editar" title="Editar">' + icon('file') + '</a>' +
+        (v.status !== 'vendido' ? '<button type="button" class="icon-sq" data-act="vendido" aria-label="Marcar como vendido" title="Marcar como vendido">' + icon('check-circle') + '</button>' : '') +
+        '<a class="icon-sq" href="../veiculo.html?id=' + encodeURIComponent(v.id) + '" target="_blank" rel="noopener" aria-label="Ver no site" title="Ver no site ↗">' + icon('external') + '</a>' +
+        '<div class="menu-wrap"><button type="button" class="icon-sq" data-menu aria-label="Mais ações">' + icon('more') + '</button><div class="pop-menu">' +
+        '<button type="button" data-act="duplicar">' + icon('copy') + ' Duplicar</button>' +
+        (v.status !== 'oculto' ? '<button type="button" data-act="ocultar">' + icon('eye-off') + ' Ocultar do site</button>' : '<button type="button" data-act="mostrar">' + icon('eye') + ' Mostrar no site</button>') +
+        (v.status === 'vendido' ? '<button type="button" data-act="voltar">' + icon('refresh') + ' Voltar para disponível</button>' : '') +
+        (Admin.isAdmin ? '<button type="button" class="danger" data-act="excluir">' + icon('trash') + ' Excluir</button>' : '') +
+        '</div></div></div></td></tr>';
+    }).join('');
+    atualizarBulk();
+  }
+
+  function atualizar(ids, campos, msg) {
+    return sb.from('veiculos').update(campos).in('id', ids).then(function (r) {
+      if (r.error) throw r.error;
+      todos.forEach(function (v) { if (ids.indexOf(v.id) > -1) Object.assign(v, campos); });
+      render(); if (msg) A.toast(msg);
+    }).catch(function (e) { Admin.erro(e); render(); });
+  }
+
+  function excluir(ids) {
+    var fotos = [];
+    return sb.from('veiculo_fotos').select('path').in('veiculo_id', ids).then(function (r) {
+      fotos = (r.data || []).map(function (f) { return f.path; }).filter(Boolean);
+      return sb.from('veiculos').delete().in('id', ids);
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      if (fotos.length) sb.storage.from('veiculos').remove(fotos);
+      todos = todos.filter(function (v) { return ids.indexOf(v.id) < 0; });
+      ids.forEach(function (i) { delete sel[i]; });
+      render(); A.toast(ids.length > 1 ? ids.length + ' veículos excluídos.' : 'Veículo excluído.');
+    });
+  }
+
+  function marcarVendido(v) {
+    var hoje = new Date().toISOString().slice(0, 10);
+    Admin.modal({
+      title: 'Marcar como vendido',
+      body: '<p style="margin-bottom:16px"><strong>' + esc(v.marca + ' ' + v.modelo + ' ' + (v.versao || '')) + '</strong> sai do site e dos favoritos dos clientes.</p>' +
+        '<div class="field"><label for="m-data">Data da venda</label><input class="input" type="date" id="m-data" value="' + hoje + '" required></div>' +
+        '<div class="field"><label for="m-valor">Valor final (R$) — opcional</label><input class="input" id="m-valor" data-mask="money" inputmode="numeric" value="' + (v.preco ? A.money(v.preco) : '') + '"></div>' +
+        '<div class="field"><label for="m-vend">Vendedor responsável</label><select class="select" id="m-vend"><option value="">—</option>' +
+        vendedores.map(function (x) { return '<option value="' + x.id + '"' + (v.vendedor_id === x.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select></div>',
+      confirmText: 'Confirmar venda',
+      onConfirm: function (m) {
+        var d = A.qs('#m-data', m).value; if (!d) { A.toast('Informe a data da venda.'); return false; }
+        return atualizar([v.id], { status: 'vendido', vendido_em: d, valor_venda: A.parseMoney(A.qs('#m-valor', m).value), vendedor_id: A.qs('#m-vend', m).value || null, destaque: false }, 'Venda registrada. Parabéns!');
+      }
+    });
+  }
+
+  function duplicar(v) {
+    var novo = Object.assign({}, v);
+    ['veiculo_fotos', 'created_at', 'updated_at', 'vendido_em', 'valor_venda', 'created_by'].forEach(function (k) { delete novo[k]; });
+    novo.id = Admin.slug(v.marca + ' ' + v.modelo + ' ' + (v.versao || '').split(' ')[0] + ' ' + v.ano_modelo) + '-' + Math.random().toString(36).slice(2, 6);
+    novo.status = 'oculto'; novo.destaque = false; novo.placa = null; novo.data_cadastro = new Date().toISOString().slice(0, 10);
+    sb.from('veiculos').insert(novo).then(function (r) {
+      if (r.error) throw r.error;
+      var fotos = (v.veiculo_fotos || []).map(function (f) { return { veiculo_id: novo.id, url: f.url, ordem: f.ordem }; });
+      return fotos.length ? sb.from('veiculo_fotos').insert(fotos) : null;
+    }).then(function () {
+      A.toast('Cópia criada como "Oculto". Revise e publique.');
+      setTimeout(function () { location.href = 'veiculo-form.html?id=' + encodeURIComponent(novo.id); }, 700);
+    }).catch(function (e) { Admin.erro(e); });
+  }
+
+  function importarDemo() {
+    var b = A.qs('#importar'); b.classList.add('is-loading');
+    fetch('../data/veiculos.json').then(function (r) { return r.json(); }).then(function (lista) {
+      var rows = lista.map(function (v) {
+        return { id: v.id, marca: v.marca, modelo: v.modelo, versao: v.versao, ano_fabricacao: v.anoFabricacao, ano_modelo: v.anoModelo, km: v.km,
+          cambio: v.cambio, combustivel: v.combustivel, carroceria: v.carroceria, cor: v.cor, portas: v.portas, preco: v.preco, opcionais: v.opcionais || [],
+          descricao: v.descricao, destaque: !!v.destaque, status: v.status || 'disponivel', data_cadastro: v.dataCadastro };
+      });
+      return sb.from('veiculos').insert(rows).then(function (r) {
+        if (r.error) throw r.error;
+        var fotos = [];
+        lista.forEach(function (v) { (v.fotos || []).forEach(function (f, i) { fotos.push({ veiculo_id: v.id, url: Admin.siteUrl(f), ordem: i }); }); });
+        return sb.from('veiculo_fotos').insert(fotos);
+      });
+    }).then(function (r) {
+      if (r && r.error) throw r.error;
+      A.toast('Estoque de demonstração importado.'); carregar();
+    }).catch(function (e) { b.classList.remove('is-loading'); Admin.erro(e); });
+  }
+
+  /* ---------- eventos ---------- */
+  A.qs('#tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return;
+    estado.status = b.getAttribute('data-tab'); sel = {}; render();
+    var u = new URL(location.href); if (estado.status === 'todos') u.searchParams.delete('status'); else u.searchParams.set('status', estado.status); history.replaceState(null, '', u);
+  });
+  A.qs('#f-q').addEventListener('input', Admin.debounce(function () { estado.q = this.value; render(); }, 200));
+  A.qs('#f-marca').addEventListener('change', function () { estado.marca = this.value; render(); });
+  A.qs('#f-carr').addEventListener('change', function () { estado.carr = this.value; render(); });
+  A.qs('#f-ord').addEventListener('change', function () { estado.ord = this.value; render(); });
+
+  var tbody = A.qs('#tbody');
+  tbody.addEventListener('change', function (e) {
+    var s = e.target.closest('[data-status]');
+    if (s) atualizar([s.getAttribute('data-status')], { status: s.value }, 'Status atualizado.');
+    var c = e.target.closest('[data-sel]');
+    if (c) { if (c.checked) sel[c.getAttribute('data-sel')] = 1; else delete sel[c.getAttribute('data-sel')]; atualizarBulk(); }
+  });
+  tbody.addEventListener('click', function (e) {
+    var st = e.target.closest('[data-star]');
+    if (st) { var id = st.getAttribute('data-star'), v = todos.filter(function (x) { return x.id === id; })[0]; atualizar([id], { destaque: !v.destaque }, !v.destaque ? 'Destacado na home.' : 'Destaque removido.'); return; }
+    var a = e.target.closest('[data-act]'); if (!a) return;
+    var vid = a.closest('tr').getAttribute('data-id'), veic = todos.filter(function (x) { return x.id === vid; })[0];
+    var act = a.getAttribute('data-act');
+    if (act === 'vendido') marcarVendido(veic);
+    if (act === 'duplicar') duplicar(veic);
+    if (act === 'ocultar') atualizar([vid], { status: 'oculto' }, 'Veículo ocultado do site.');
+    if (act === 'mostrar' || act === 'voltar') atualizar([vid], { status: 'disponivel', vendido_em: null, valor_venda: null }, 'Veículo disponível no site.');
+    if (act === 'excluir') Admin.confirmar('Tem certeza que deseja excluir ' + veic.marca + ' ' + veic.modelo + '? Essa ação não pode ser desfeita.', { title: 'Excluir veículo', danger: true, confirmText: 'Excluir' })
+      .then(function (ok) { if (ok) excluir([vid]).catch(Admin.erro); });
+  });
+
+  A.qs('#sel-todos').addEventListener('change', function () {
+    var on = this.checked;
+    A.qsa('[data-sel]').forEach(function (c) { c.checked = on; if (on) sel[c.getAttribute('data-sel')] = 1; else delete sel[c.getAttribute('data-sel')]; });
+    atualizarBulk();
+  });
+  function atualizarBulk() {
+    var n = Object.keys(sel).length;
+    A.qs('#bulk').classList.toggle('is-on', n > 0);
+    A.qs('#bulk-n').textContent = n + (n === 1 ? ' selecionado' : ' selecionados');
+    var visiveis = A.qsa('[data-sel]');
+    A.qs('#sel-todos').checked = visiveis.length > 0 && visiveis.every(function (c) { return c.checked; });
+  }
+  A.qs('#bulk-status').addEventListener('change', function () {
+    if (!this.value) return; var ids = Object.keys(sel), v = this.value; this.value = '';
+    atualizar(ids, { status: v }, ids.length + ' veículo(s) atualizados.');
+  });
+  A.qs('#bulk').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-bulk]'); if (!b) return;
+    var ids = Object.keys(sel), k = b.getAttribute('data-bulk');
+    if (k === 'limpar') { sel = {}; render(); }
+    if (k === 'destacar') atualizar(ids, { destaque: true }, 'Destaque aplicado.');
+    if (k === 'tirar') atualizar(ids, { destaque: false }, 'Destaque removido.');
+    if (k === 'excluir') Admin.confirmar('Tem certeza que deseja excluir ' + ids.length + ' veículo(s)? Essa ação não pode ser desfeita.', { title: 'Excluir veículos', danger: true, confirmText: 'Excluir' })
+      .then(function (ok) { if (ok) excluir(ids).catch(Admin.erro); });
+  });
+})();
+</script>
+</body>
+</html>

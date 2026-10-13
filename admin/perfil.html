@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu perfil | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <div class="banner-warn" id="aviso-troca" hidden><strong>Bem-vindo(a)!</strong> Por segurança, crie uma senha pessoal antes de usar o painel.</div>
+  <div class="grid-2" style="align-items:start">
+    <section class="card">
+      <div class="card-head"><h2>Meus dados</h2></div>
+      <form id="f-dados" novalidate>
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
+          <span id="av"></span>
+          <label class="btn btn-outline btn-xs" style="cursor:pointer">Trocar foto<input type="file" id="foto" accept="image/jpeg,image/png,image/webp" hidden></label>
+          <button type="button" class="btn btn-ghost btn-xs" id="rm-foto">Remover</button>
+        </div>
+        <div class="field"><label for="nome">Nome *</label><input class="input" id="nome" required></div>
+        <div class="field"><label for="email">E-mail de acesso</label><input class="input" id="email" disabled></div>
+        <div class="field"><label for="telefone">Telefone / WhatsApp</label><input class="input" id="telefone" data-mask="phone" inputmode="tel"></div>
+        <p class="hint" style="margin-bottom:16px">Função: <strong id="funcao"></strong></p>
+        <button class="btn btn-primary btn-sm" type="submit">Salvar dados</button>
+      </form>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Trocar senha</h2></div>
+      <form id="f-senha" novalidate>
+        <div class="field" id="box-atual"><label for="atual">Senha atual *</label><input class="input" id="atual" type="password" autocomplete="current-password"></div>
+        <div class="field"><label for="nova">Nova senha *</label><input class="input" id="nova" type="password" autocomplete="new-password" minlength="8">
+          <div class="strength"><span id="forca-bar"></span></div><span class="strength-lbl" id="forca-lbl"></span></div>
+        <div class="field"><label for="conf">Confirme a nova senha *</label><input class="input" id="conf" type="password" autocomplete="new-password"></div>
+        <button class="btn btn-primary btn-sm" type="submit">Alterar senha</button>
+      </form>
+    </section>
+  </div>
+</main>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App;
+  var sb, p, avatar;
+  Admin.bindForca(A.qs('#nova'), A.qs('#forca-bar'), A.qs('#forca-lbl'));
+
+  Admin.init({ page: 'perfil', title: 'Meu perfil', crumbs: [{ label: 'Meu perfil' }] }).then(function (ctx) {
+    sb = ctx.sb; p = ctx.profile; avatar = p.avatar || null;
+    if (p.trocar_senha) { A.qs('#aviso-troca').hidden = false; A.qs('#nova').focus(); }
+    A.qs('#nome').value = p.nome || ''; A.qs('#email').value = p.email || Admin.user.email;
+    A.qs('#telefone').value = p.telefone || ''; A.qs('#funcao').textContent = p.funcao === 'admin' ? 'Administrador' : 'Vendedor';
+    A.applyMasks(document); av();
+  });
+  function av() { A.qs('#av').innerHTML = Admin.avatar({ nome: A.qs('#nome').value, avatar: avatar }, 64); }
+
+  A.qs('#foto').addEventListener('change', function () {
+    var f = this.files[0]; if (!f) return;
+    Admin.uploadImagemSite(f, 'avatars/' + p.id, 400).then(function (r) { avatar = r.url; av(); A.toast('Foto enviada. Clique em “Salvar dados”.'); }).catch(function (e) { Admin.erro(e, 'Falha ao enviar a foto.'); });
+  });
+  A.qs('#rm-foto').addEventListener('click', function () { avatar = null; av(); });
+
+  A.qs('#f-dados').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nome = A.qs('#nome').value.trim(); if (!nome) { A.toast('Informe seu nome.'); return; }
+    var b = e.target.querySelector('[type=submit]'); b.classList.add('is-loading');
+    sb.from('profiles').update({ nome: nome, telefone: A.qs('#telefone').value.trim() || null, avatar: avatar }).eq('id', p.id).then(function (r) {
+      b.classList.remove('is-loading');
+      if (r.error) return Admin.erro(r.error);
+      A.toast('Dados salvos.');
+      A.qsa('.user-card strong').forEach(function (s) { s.textContent = nome; });
+      A.qsa('.user-card .avatar').forEach(function (s) { s.outerHTML = Admin.avatar({ nome: nome, avatar: avatar }); });
+    });
+  });
+
+  A.qs('#f-senha').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var atual = A.qs('#atual').value, nova = A.qs('#nova').value, conf = A.qs('#conf').value;
+    if (!atual) { A.toast('Informe a senha atual.'); return; }
+    if (nova.length < 8) { A.toast('A nova senha precisa ter pelo menos 8 caracteres.'); return; }
+    if (Admin.forca(nova).score < 2) { A.toast('Senha fraca. Misture letras maiúsculas, minúsculas e números.'); return; }
+    if (nova !== conf) { A.toast('As senhas não conferem.'); return; }
+    if (nova === atual) { A.toast('A nova senha precisa ser diferente da atual.'); return; }
+    var b = e.target.querySelector('[type=submit]'); b.classList.add('is-loading');
+    // Confere a senha atual antes de trocar
+    sb.auth.signInWithPassword({ email: p.email || Admin.user.email, password: atual }).then(function (r) {
+      if (r.error) throw new Error('A senha atual está incorreta.');
+      return sb.auth.updateUser({ password: nova });
+    }).then(function (r) {
+      if (r.error) throw r.error;
+      return p.trocar_senha ? sb.from('profiles').update({ trocar_senha: false }).eq('id', p.id) : null;
+    }).then(function () {
+      b.classList.remove('is-loading'); e.target.reset(); A.qs('#forca-bar').style.width = '0';
+      A.toast('Senha alterada com sucesso.');
+      if (p.trocar_senha) { p.trocar_senha = false; setTimeout(function () { location.href = 'index.html'; }, 900); }
+    }).catch(function (err) { b.classList.remove('is-loading'); A.toast(err.message || 'Não foi possível alterar a senha.', 3500); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar no painel | Vehicle Store</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<div class="login">
+  <div class="login-art" id="login-art">
+    <img id="login-logo" src="../assets/img/logo-claro.png" alt="Vehicle Store">
+    <p>Área do lojista</p>
+    <small>Gerencie estoque, leads e a vitrine do site em um só lugar.</small>
+  </div>
+  <div class="login-side">
+    <div class="login-card">
+      <div class="shield"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <h1>Entrar no painel</h1>
+      <p>Acesso exclusivo da equipe <span data-nome-loja>Vehicle Store</span>.</p>
+      <div class="form-msg" id="msg" role="alert"></div>
+      <form id="login-form" novalidate>
+        <div class="field"><label for="email">E-mail</label><input class="input" id="email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="senha">Senha</label>
+          <div class="pw-wrap"><input class="input" id="senha" type="password" autocomplete="current-password" required>
+            <button type="button" id="ver-senha" aria-label="Mostrar senha" aria-pressed="false"></button></div></div>
+        <label class="check" style="margin-bottom:20px"><input type="checkbox" id="manter" checked> Manter conectado</label>
+        <button class="btn btn-primary btn-block" type="submit" id="btn-entrar">Entrar <span class="arrow">→</span></button>
+      </form>
+      <div class="login-links"><a href="recuperar-senha.html">Esqueci minha senha</a><a class="back" href="../index.html">← Voltar para o site</a></div>
+    </div>
+  </div>
+</div>
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, L = SITE_CONFIG.loja;
+  var msg = A.qs('#msg'), form = A.qs('#login-form'), btn = A.qs('#btn-entrar');
+  var LOCK_KEY = 'vs_login_falhas', MAX = 5, BLOQUEIO_MIN = 5;
+  var params = new URLSearchParams(location.search);
+  var next = params.get('next');
+  if (!next || /^(https?:)?\/\//.test(next) || next.indexOf('login') === 0) next = 'index.html';
+
+  function mostrar(t, ok) { msg.textContent = t; msg.className = 'form-msg ' + (ok ? 'is-ok' : 'is-error'); }
+  function falhas() { return A.store(LOCK_KEY) || { n: 0, ate: 0 }; }
+  function bloqueado() {
+    var f = falhas();
+    if (f.ate && f.ate > Date.now()) {
+      var min = Math.ceil((f.ate - Date.now()) / 60000);
+      mostrar('Muitas tentativas sem sucesso. Por segurança, aguarde ' + min + (min === 1 ? ' minuto' : ' minutos') + ' e tente de novo.');
+      btn.disabled = true;
+      setTimeout(function () { btn.disabled = false; msg.className = 'form-msg'; }, f.ate - Date.now());
+      return true;
+    }
+    return false;
+  }
+
+  // Identidade
+  document.querySelectorAll('[data-nome-loja]').forEach(function (e) { e.textContent = L.nome; });
+  A.qs('#login-logo').outerHTML = A.marca(true).replace('<img ', '<img id="login-logo" ').replace('class="brand-text', 'id="login-logo" style="font-size:34px;margin-bottom:22px" class="brand-text');
+  document.title = document.title.replace('Vehicle Store', L.nome);
+  A.qs('#login-art').style.backgroundImage = 'url("' + A.url(L.lojaImg) + '")';
+
+  // Mostrar/ocultar senha
+  var ver = A.qs('#ver-senha'), senha = A.qs('#senha');
+  ver.innerHTML = A.icon('eye');
+  ver.addEventListener('click', function () {
+    var show = senha.type === 'password';
+    senha.type = show ? 'text' : 'password';
+    ver.innerHTML = A.icon(show ? 'eye-off' : 'eye');
+    ver.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+    ver.setAttribute('aria-pressed', show);
+  });
+
+  if (params.get('desativado')) mostrar('Seu acesso está desativado. Fale com o administrador.');
+  if (params.get('senha') === 'ok') mostrar('Senha alterada. Entre com a nova senha.', true);
+
+  DB.ready.then(function () {
+    if (DB.demo || !DB.client) {
+      mostrar('Configure o Supabase para ativar o painel (veja o LEIA-ME.md). O site está em modo demonstração.');
+      form.querySelectorAll('input,button').forEach(function (e) { e.disabled = true; });
+      return;
+    }
+    var sb = DB.client;
+    // Já está logado? vai direto
+    sb.auth.getSession().then(function (r) {
+      if (r.data && r.data.session && !params.get('desativado')) location.replace(next);
+    });
+    bloqueado();
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (bloqueado()) return;
+      var email = A.qs('#email').value.trim(), pass = senha.value;
+      if (!email || !pass) { mostrar('Informe e-mail e senha.'); return; }
+      try { localStorage.setItem('vs_manter', A.qs('#manter').checked ? '1' : '0'); } catch (err) {}
+      btn.classList.add('is-loading'); var t = btn.innerHTML; btn.innerHTML = '<span class="spinner"></span> Entrando…';
+      sb.auth.signInWithPassword({ email: email, password: pass }).then(function (r) {
+        if (r.error) throw r.error;
+        return sb.from('profiles').select('ativo').eq('id', r.data.user.id).maybeSingle();
+      }).then(function (r) {
+        if (!r.data || !r.data.ativo) {
+          return sb.auth.signOut().then(function () { throw { desativado: true }; });
+        }
+        A.store(LOCK_KEY, { n: 0, ate: 0 });
+        try { sessionStorage.removeItem('vs_acesso'); } catch (err) {}
+        location.replace(next);
+      }).catch(function (err) {
+        btn.classList.remove('is-loading'); btn.innerHTML = t;
+        if (err && err.desativado) { mostrar('Seu acesso está desativado. Fale com o administrador.'); return; }
+        var m = (err && err.message) || '';
+        if (/invalid login credentials/i.test(m)) {
+          var f = falhas(); f.n = (f.n || 0) + 1;
+          if (f.n >= MAX) { f.ate = Date.now() + BLOQUEIO_MIN * 60000; f.n = 0; }
+          A.store(LOCK_KEY, f);
+          if (!bloqueado()) mostrar('E-mail ou senha incorretos.' + (f.n >= 3 ? ' Restam ' + (MAX - f.n) + ' tentativas.' : ''));
+        } else if (/email not confirmed/i.test(m)) mostrar('Confirme seu e-mail pelo link que enviamos antes de entrar.');
+        else if (/rate limit|too many/i.test(m)) mostrar('Muitas tentativas. Aguarde alguns minutos e tente novamente.');
+        else mostrar('Não foi possível entrar agora. Verifique sua conexão e tente de novo.');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

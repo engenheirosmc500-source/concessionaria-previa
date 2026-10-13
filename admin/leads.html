@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leads | Painel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body data-area="admin" data-base="../">
+<main class="adm-main" id="adm-main">
+  <div class="tabs" id="tabs" role="tablist" aria-label="Tipo de lead"></div>
+  <div class="toolbar">
+    <label class="sr-only" for="f-q">Buscar</label>
+    <input class="input grow" id="f-q" placeholder="Buscar por nome ou telefone" autocomplete="off">
+    <label class="sr-only" for="f-status">Status</label>
+    <select class="select" id="f-status"><option value="">Todos os status</option></select>
+    <label class="sr-only" for="f-resp">Responsável</label>
+    <select class="select" id="f-resp"><option value="">Todos os responsáveis</option><option value="eu">Meus leads</option><option value="nenhum">Sem responsável</option></select>
+    <label class="sr-only" for="f-periodo">Período</label>
+    <select class="select" id="f-periodo"><option value="">Todo o período</option><option value="0">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select>
+    <label class="switch" title="Tocar som quando chegar lead novo"><input type="checkbox" id="som"><span class="tr"></span> Som</label>
+    <button type="button" class="btn btn-outline btn-sm" id="exportar" hidden></button>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead><tr><th>Nome</th><th>Telefone</th><th>Tipo</th><th>Veículo</th><th>Recebido</th><th>Responsável</th><th>Status</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="7" class="empty-row">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<div class="sheet-bg" id="sheet-bg"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-nome" aria-hidden="true">
+  <div class="sheet-head"><div><h2 id="sh-nome">Lead</h2><div id="sh-sub" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div></div>
+    <button type="button" class="icon-sq" id="sh-close" aria-label="Fechar"></button></div>
+  <div class="sheet-body" id="sh-body"></div>
+</aside>
+
+<script src="../data/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+(function () {
+  var A = App, esc = A.esc, icon = A.icon, L = SITE_CONFIG.loja;
+  var params = new URLSearchParams(location.search);
+  var estado = { tipo: params.get('tipo') || 'todos', status: params.get('status') || '', resp: '', periodo: '', q: '' };
+  var sb, me, leads = [], usuarios = [], aberto = null;
+  var LABELS = { veiculo: 'Veículo do cliente', km: 'Quilometragem', valor_desejado: 'Valor desejado', valor_veiculo: 'Valor do veículo', entrada: 'Entrada',
+    prazo: 'Prazo', troca: 'Tem carro na troca', troca_veiculo: 'Veículo da troca', veiculo_id: 'Veículo de interesse', origem: 'Origem', preco: 'Preço anunciado' };
+
+  A.qs('#sh-close').innerHTML = icon('x');
+  A.qs('#exportar').innerHTML = icon('download') + ' Exportar CSV';
+  A.qs('#f-status').innerHTML = '<option value="">Todos os status</option>' + Object.keys(Admin.STATUS_LEAD).map(function (k) { return '<option value="' + k + '">' + Admin.STATUS_LEAD[k] + '</option>'; }).join('');
+  A.qs('#f-status').value = estado.status;
+  try { A.qs('#som').checked = localStorage.getItem('vs_som') === '1'; } catch (e) {}
+  A.qs('#som').addEventListener('change', function () { try { localStorage.setItem('vs_som', this.checked ? '1' : '0'); } catch (e) {} if (this.checked) Admin.beep(); });
+
+  Admin.init({ page: 'leads', title: 'Leads', crumbs: [{ label: 'Leads' }] }).then(function (ctx) {
+    sb = ctx.sb; me = ctx.profile;
+    if (Admin.isAdmin) A.qs('#exportar').hidden = false;
+    Admin.usuarios().then(function (u) {
+      usuarios = u;
+      if (Admin.isAdmin) A.qs('#f-resp').insertAdjacentHTML('beforeend', u.map(function (x) { return '<option value="' + x.id + '">' + esc(x.nome || x.email) + '</option>'; }).join(''));
+    });
+    carregar().then(function () { var l = params.get('lead'); if (l) abrir(l); });
+    sb.channel('leads-page')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, function () {
+        A.toast('Novo lead recebido'); if (A.qs('#som').checked) Admin.beep(); carregar();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'leads' }, Admin.debounce(function () { carregar(); }, 500))
+      .subscribe();
+  });
+
+  function carregar() {
+    return sb.from('leads').select('*,veiculos(id,marca,modelo,versao,ano_modelo,preco),responsavel:profiles(id,nome)').order('created_at', { ascending: false }).limit(1000).then(function (r) {
+      if (r.error) { Admin.erro(r.error); return; }
+      leads = r.data; render();
+      if (aberto) { var l = leads.filter(function (x) { return x.id === aberto; })[0]; if (l) cabecalho(l); }
+    });
+  }
+
+  function filtrados(semTipo) {
+    var q = A.norm(estado.q), qd = A.onlyDigits(estado.q), lim = null;
+    if (estado.periodo !== '') { var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - Number(estado.periodo)); lim = d.getTime(); }
+    return leads.filter(function (l) {
+      if (!semTipo && estado.tipo !== 'todos' && l.tipo !== estado.tipo) return false;
+      if (estado.status && l.status !== estado.status) return false;
+      if (estado.resp === 'eu' && l.responsavel_id !== me.id) return false;
+      if (estado.resp === 'nenhum' && l.responsavel_id) return false;
+      if (estado.resp && ['eu', 'nenhum'].indexOf(estado.resp) < 0 && l.responsavel_id !== estado.resp) return false;
+      if (lim && new Date(l.created_at).getTime() < lim) return false;
+      if (q && A.norm(l.nome).indexOf(q) < 0 && !(qd && A.onlyDigits(l.telefone).indexOf(qd) > -1)) return false;
+      return true;
+    });
+  }
+  function nomeVeic(l) { var v = l.veiculos; return v ? v.marca + ' ' + v.modelo + ' ' + (v.ano_modelo || '') : (l.dados && l.dados.veiculo) || '—'; }
+
+  function render() {
+    var base = filtrados(true), c = { todos: base.length, interesse: 0, avaliacao: 0, financiamento: 0, contato: 0 };
+    base.forEach(function (l) { c[l.tipo]++; });
+    var nomes = { todos: 'Todos', interesse: 'Interesse em veículo', avaliacao: 'Avaliação (venda seu veículo)', financiamento: 'Financiamento', contato: 'Contato' };
+    A.qs('#tabs').innerHTML = Object.keys(nomes).map(function (k) {
+      return '<button type="button" role="tab" aria-selected="' + (estado.tipo === k) + '" class="' + (estado.tipo === k ? 'is-active' : '') + '" data-tab="' + k + '">' + nomes[k] + ' <span class="n">' + c[k] + '</span></button>';
+    }).join('');
+    var l = filtrados(false), tb = A.qs('#tbody');
+    if (!l.length) { tb.innerHTML = '<tr><td colspan="7" class="empty-row">' + icon('inbox') + (leads.length ? 'Nenhum lead com esses filtros.' : 'Nenhum lead ainda. Assim que alguém preencher um formulário no site, ele aparece aqui na hora.') + '</td></tr>'; return; }
+    tb.innerHTML = l.map(function (x) {
+      return '<tr class="clickable' + (x.status === 'novo' ? ' tr-new' : '') + '" data-id="' + x.id + '" tabindex="0">' +
+        '<td class="cell-main">' + (x.status === 'novo' ? '<span class="dot-new" aria-label="Novo"></span>' : '') + esc(x.nome) + '</td>' +
+        '<td data-label="Telefone" class="num">' + esc(x.telefone || '—') + '</td>' +
+        '<td data-label="Tipo">' + Admin.chip('tipo', x.tipo) + '</td>' +
+        '<td data-label="Veículo">' + esc(nomeVeic(x)) + '</td>' +
+        '<td data-label="Recebido" class="muted" style="white-space:nowrap" title="' + Admin.dataHoraBR(x.created_at) + '">' + A.relTime(x.created_at) + '</td>' +
+        '<td data-label="Responsável">' + (x.responsavel ? esc(x.responsavel.nome) : '<span class="muted">Sem responsável</span>') + '</td>' +
+        '<td data-label="Status">' + Admin.chip('lead', x.status) + '</td></tr>';
+    }).join('');
+  }
+
+  /* ---------- painel lateral ---------- */
+  var sheet = A.qs('#sheet'), sbg = A.qs('#sheet-bg');
+  function fechar() { sheet.classList.remove('is-open'); sbg.classList.remove('is-open'); sheet.setAttribute('aria-hidden', 'true'); aberto = null; document.body.classList.remove('no-scroll');
+    var u = new URL(location.href); u.searchParams.delete('lead'); history.replaceState(null, '', u); }
+  A.qs('#sh-close').addEventListener('click', fechar); sbg.addEventListener('click', fechar);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && aberto && !document.querySelector('.modal-bg')) fechar(); });
+
+  function cabecalho(l) {
+    A.qs('#sh-nome').textContent = l.nome;
+    A.qs('#sh-sub').innerHTML = Admin.chip('tipo', l.tipo) + Admin.chip('lead', l.status) + '<span class="muted" style="font-size:12.5px">' + Admin.dataHoraBR(l.created_at) + '</span>';
+  }
+
+  function abrir(lid) {
+    var l = leads.filter(function (x) { return x.id === lid; })[0];
+    if (!l) { A.toast('Lead não encontrado ou sem permissão.'); return; }
+    aberto = lid;
+    var u = new URL(location.href); u.searchParams.set('lead', lid); history.replaceState(null, '', u);
+    // Abrir lead novo -> Em atendimento e atribui a quem abriu
+    if (l.status === 'novo') {
+      var upd = { status: 'em_atendimento' }; if (!l.responsavel_id) upd.responsavel_id = me.id;
+      sb.from('leads').update(upd).eq('id', l.id).then(function (r) {
+        if (r.error) return;
+        Object.assign(l, upd); if (upd.responsavel_id) l.responsavel = { id: me.id, nome: me.nome };
+        cabecalho(l); render(); Admin.contarLeadsNovos(); corpo(l);
+      });
+    }
+    cabecalho(l); corpo(l);
+    sheet.classList.add('is-open'); sbg.classList.add('is-open'); sheet.setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll');
+    A.qs('#sh-close').focus();
+  }
+
+  function corpo(l) {
+    var primeiro = (l.nome || '').split(' ')[0];
+    var assunto = { interesse: 'o ' + nomeVeic(l), avaliacao: 'a avaliação do seu veículo', financiamento: 'o financiamento' + (l.veiculos ? ' do ' + nomeVeic(l) : ''), contato: 'sua mensagem' }[l.tipo];
+    var msgWa = 'Olá, ' + primeiro + '! Aqui é ' + (me.nome || '').split(' ')[0] + ' da ' + L.nome + ', recebemos sua solicitação sobre ' + assunto + '.';
+    var dados = l.dados || {}, linhas = [];
+    linhas.push(['Telefone', l.telefone || '—']);
+    if (l.email) linhas.push(['E-mail', l.email]);
+    Object.keys(dados).forEach(function (k) { if (k === 'veiculo_id') return; linhas.push([LABELS[k] || k.replace(/_/g, ' '), dados[k]]); });
+    if (l.mensagem) linhas.push(['Mensagem', l.mensagem]);
+    var veic = l.veiculos ? '<a class="link-arrow" href="../veiculo.html?id=' + encodeURIComponent(l.veiculos.id) + '" target="_blank" rel="noopener">' + esc(nomeVeic(l)) + ' ↗</a> <a class="muted" style="font-size:13px;margin-left:8px" href="veiculo-form.html?id=' + encodeURIComponent(l.veiculos.id) + '">editar</a>' : '';
+    var podeAtribuir = Admin.isAdmin;
+    var h =
+      '<div class="sheet-section"><div class="contact-actions">' +
+      (l.telefone ? '<a class="btn btn-wa-sm btn-sm" href="' + esc(A.waLink(Admin.waNumero(l.telefone), msgWa)) + '" target="_blank" rel="noopener">' + icon('whatsapp') + ' Responder no WhatsApp</a>' +
+        '<a class="btn btn-outline btn-sm" href="tel:' + A.onlyDigits(l.telefone) + '">' + icon('phone') + ' Ligar</a>' : '<span class="hint">O cliente clicou em “Tenho interesse” e foi direto para o WhatsApp da loja — confira a conversa por lá.</span>') +
+      (l.email ? '<a class="btn btn-outline btn-sm" href="mailto:' + esc(l.email) + '?subject=' + encodeURIComponent(L.nome + ' — sua solicitação') + '">' + icon('mail') + ' E-mail</a>' : '') +
+      '</div></div>' +
+      (veic ? '<div class="sheet-section"><h3>Veículo de interesse</h3>' + veic + '</div>' : '') +
+      '<div class="sheet-section"><h3>Dados enviados</h3><dl class="kv">' + linhas.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd style="white-space:pre-line">' + esc(r[1]) + '</dd>'; }).join('') + '</dl></div>' +
+      (l.fotos && l.fotos.length ? '<div class="sheet-section"><h3>Fotos do carro (' + l.fotos.length + ')</h3><div class="lead-photos" id="sh-fotos">' + l.fotos.map(function () { return '<span class="skel" style="aspect-ratio:1"></span>'; }).join('') + '</div></div>' : '') +
+      '<div class="sheet-section"><h3>Atendimento</h3>' +
+      '<div class="field"><label for="sh-resp">Responsável</label>' + (podeAtribuir ?
+        '<select class="select" id="sh-resp"><option value="">Sem responsável</option>' + usuarios.filter(function (u) { return u.ativo; }).map(function (u) { return '<option value="' + u.id + '"' + (l.responsavel_id === u.id ? ' selected' : '') + '>' + esc(u.nome || u.email) + '</option>'; }).join('') + '</select>' :
+        '<input class="input" id="sh-resp-txt" value="' + esc(l.responsavel ? l.responsavel.nome : 'Sem responsável') + '" disabled>') + '</div>' +
+      '<div class="field"><label for="sh-status">Status</label><select class="select" id="sh-status">' + Object.keys(Admin.STATUS_LEAD).map(function (k) { return '<option value="' + k + '"' + (l.status === k ? ' selected' : '') + '>' + Admin.STATUS_LEAD[k] + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field" id="sh-motivo-box"' + (l.status === 'perdido' ? '' : ' hidden') + '><label for="sh-motivo">Motivo da perda</label><input class="input" id="sh-motivo" value="' + esc(l.motivo_perda || '') + '" placeholder="Ex.: comprou em outra loja, sem crédito aprovado…"></div>' +
+      (Admin.isAdmin ? '<button type="button" class="btn btn-ghost btn-xs" id="sh-excluir" style="color:var(--danger)">' + icon('trash') + ' Excluir lead</button>' : '') +
+      '</div>' +
+      '<div class="sheet-section"><h3>Anotações internas</h3><ul class="notes" id="sh-notas"><li class="muted" style="border:0;background:none">Carregando…</li></ul>' +
+      '<div class="field"><label class="sr-only" for="sh-nota">Nova anotação</label><textarea class="textarea" id="sh-nota" rows="3" style="min-height:80px" placeholder="Escreva uma anotação para a equipe (o cliente não vê)."></textarea></div>' +
+      '<button type="button" class="btn btn-primary btn-sm" id="sh-add-nota">Adicionar anotação</button></div>';
+    A.qs('#sh-body').innerHTML = h;
+    A.qs('#sh-body').scrollTop = 0;
+
+    if (l.fotos && l.fotos.length) {
+      sb.storage.from('leads-fotos').createSignedUrls(l.fotos, 3600).then(function (r) {
+        if (r.error) { A.qs('#sh-fotos').innerHTML = '<span class="hint">Não foi possível carregar as fotos.</span>'; return; }
+        A.qs('#sh-fotos').innerHTML = r.data.map(function (f, i) {
+          var dl = f.signedUrl + (f.signedUrl.indexOf('?') > -1 ? '&' : '?') + 'download=' + encodeURIComponent(Admin.slug(l.nome) + '-foto-' + (i + 1) + '.' + (f.path.split('.').pop()));
+          return '<a href="' + esc(dl) + '" title="Baixar foto ' + (i + 1) + '"><img src="' + esc(f.signedUrl) + '" alt="Foto ' + (i + 1) + ' enviada pelo cliente" loading="lazy"></a>';
+        }).join('');
+      });
+    }
+
+    var salvar = function (campos, msg) {
+      return sb.from('leads').update(campos).eq('id', l.id).then(function (r) {
+        if (r.error) throw r.error; Object.assign(l, campos);
+        if ('responsavel_id' in campos) { var u = usuarios.filter(function (x) { return x.id === campos.responsavel_id; })[0]; l.responsavel = u ? { id: u.id, nome: u.nome } : null; }
+        cabecalho(l); render(); Admin.contarLeadsNovos(); A.toast(msg || 'Lead atualizado.');
+      }).catch(Admin.erro);
+    };
+    var rs = A.qs('#sh-resp'); if (rs) rs.addEventListener('change', function () { salvar({ responsavel_id: rs.value || null }, 'Responsável atualizado.'); });
+    A.qs('#sh-status').addEventListener('change', function () {
+      var v = this.value; A.qs('#sh-motivo-box').hidden = v !== 'perdido';
+      salvar({ status: v, motivo_perda: v === 'perdido' ? (A.qs('#sh-motivo').value.trim() || null) : null }, 'Status: ' + Admin.STATUS_LEAD[v] + '.');
+      if (v === 'perdido') A.qs('#sh-motivo').focus();
+    });
+    A.qs('#sh-motivo').addEventListener('change', function () { salvar({ motivo_perda: this.value.trim() || null }, 'Motivo registrado.'); });
+    var ex = A.qs('#sh-excluir');
+    if (ex) ex.addEventListener('click', function () {
+      Admin.confirmar('Tem certeza que deseja excluir o lead de ' + l.nome + '? Essa ação não pode ser desfeita.', { title: 'Excluir lead', danger: true, confirmText: 'Excluir' }).then(function (ok) {
+        if (!ok) return;
+        sb.from('leads').delete().eq('id', l.id).then(function (r) {
+          if (r.error) return Admin.erro(r.error);
+          if (l.fotos && l.fotos.length) sb.storage.from('leads-fotos').remove(l.fotos);
+          leads = leads.filter(function (x) { return x.id !== l.id; }); fechar(); render(); A.toast('Lead excluído.'); Admin.contarLeadsNovos();
+        });
+      });
+    });
+    carregarNotas(l);
+    A.qs('#sh-add-nota').addEventListener('click', function () {
+      var t = A.qs('#sh-nota').value.trim(); if (!t) { A.qs('#sh-nota').focus(); return; }
+      var b = this; b.classList.add('is-loading');
+      sb.from('lead_notas').insert({ lead_id: l.id, texto: t, autor_id: me.id }).then(function (r) {
+        b.classList.remove('is-loading');
+        if (r.error) return Admin.erro(r.error);
+        A.qs('#sh-nota').value = ''; carregarNotas(l); A.toast('Anotação adicionada.');
+      });
+    });
+  }
+
+  function carregarNotas(l) {
+    sb.from('lead_notas').select('id,texto,created_at,autor:profiles(nome)').eq('lead_id', l.id).order('created_at', { ascending: false }).then(function (r) {
+      var ul = A.qs('#sh-notas'); if (!ul) return;
+      if (r.error || !r.data.length) { ul.innerHTML = '<li class="muted" style="border:0;background:none;padding-left:0">Nenhuma anotação ainda.</li>'; return; }
+      ul.innerHTML = r.data.map(function (n) { return '<li>' + esc(n.texto).replace(/\n/g, '<br>') + '<small>' + esc(n.autor ? n.autor.nome : 'Equipe') + ' · ' + Admin.dataHoraBR(n.created_at) + '</small></li>'; }).join('');
+    });
+  }
+
+  /* ---------- eventos ---------- */
+  A.qs('#tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (!b) return; estado.tipo = b.getAttribute('data-tab'); render(); });
+  A.qs('#f-q').addEventListener('input', Admin.debounce(function () { estado.q = this.value; render(); }, 200));
+  A.qs('#f-status').addEventListener('change', function () { estado.status = this.value; render(); });
+  A.qs('#f-resp').addEventListener('change', function () { estado.resp = this.value; render(); });
+  A.qs('#f-periodo').addEventListener('change', function () { estado.periodo = this.value; render(); });
+  A.qs('#tbody').addEventListener('click', function (e) { var tr = e.target.closest('[data-id]'); if (tr) abrir(tr.getAttribute('data-id')); });
+  A.qs('#tbody').addEventListener('keydown', function (e) { if (e.key === 'Enter') { var tr = e.target.closest('[data-id]'); if (tr) abrir(tr.getAttribute('data-id')); } });
+  A.qs('#exportar').addEventListener('click', function () {
+    var l = filtrados(false);
+    var linhas = [['Data', 'Nome', 'Telefone', 'E-mail', 'Tipo', 'Veículo', 'Status', 'Responsável', 'Mensagem', 'Detalhes', 'Motivo da perda']];
+    l.forEach(function (x) {
+      var det = Object.keys(x.dados || {}).filter(function (k) { return k !== 'veiculo_id'; }).map(function (k) { return (LABELS[k] || k) + ': ' + x.dados[k]; }).join(' | ');
+      linhas.push([Admin.dataHoraBR(x.created_at), x.nome, x.telefone, x.email, Admin.TIPO_LEAD[x.tipo], nomeVeic(x), Admin.STATUS_LEAD[x.status], x.responsavel ? x.responsavel.nome : '', x.mensagem, det, x.motivo_perda]);
+    });
+    Admin.csv(linhas, 'leads-' + new Date().toISOString().slice(0, 10) + '.csv');
+  });
+})();
+</script>
+</body>
+</html>
